@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Fork & Ledger" />
+<meta name="theme-color" content="#f4f1ea" />
+<link rel="apple-touch-icon" href="/icon.png" />
+<link rel="manifest" href="/manifest.json" />
+<title>Fork & Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<style>
+  :root {
+    --bg: #f4f1ea;
+    --ink: #1a1612;
+    --paper: #ffffff;
+    --accent: #d4471f;
+    --accent-soft: #f0d9cf;
+    --moss: #5c6b3a;
+    --moss-soft: #dde2cc;
+    --gold: #b8841c;
+    --gold-soft: #f0e3c4;
+    --muted: #8a8378;
+    --line: #e6e0d4;
+    --shadow: 0 1px 0 rgba(26, 22, 18, 0.04), 0 4px 24px rgba(26, 22, 18, 0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(212, 71, 31, 0.04) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(92, 107, 58, 0.04) 0%, transparent 40%);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  input, button { font-family: inherit; }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: max(40px, env(safe-area-inset-top)) 24px max(80px, env(safe-area-inset-bottom));
+  }
+
+  header {
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 24px;
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .brand {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(36px, 6vw, 64px);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    font-style: italic;
+  }
+
+  .brand .amp {
+    color: var(--accent);
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  .tagline {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  .date-display {
+    text-align: right;
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+  }
+
+  .date-display .day {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .date-display .full {
+    font-size: 22px;
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  .totals {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  @media (max-width: 700px) {
+    .totals { grid-template-columns: 1fr 1fr; }
+  }
+
+  .stat {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .stat.calories {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .stat-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    opacity: 0.6;
+    margin-bottom: 12px;
+  }
+
+  .stat-value {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(36px, 5vw, 56px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-value .unit {
+    font-size: 14px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 400;
+    opacity: 0.5;
+    margin-left: 6px;
+    letter-spacing: 0;
+  }
+
+  .stat-decoration {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    opacity: 0.4;
+  }
+
+  .stat.calories .stat-decoration { color: var(--accent); opacity: 0.9; }
+
+  .upload-section { margin-bottom: 48px; }
+
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 28px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .section-title::before {
+    content: '§';
+    color: var(--accent);
+    font-size: 22px;
+    font-style: normal;
+  }
+
+  .section-title .num {
+    font-family: 'DM Mono', monospace;
+    font-style: normal;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  .upload-zone {
+    background: var(--paper);
+    border: 2px dashed var(--ink);
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .upload-zone:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+
+  .upload-zone.dragging {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    transform: scale(0.99);
+  }
+
+  .upload-zone.has-image {
+    padding: 24px;
+    cursor: default;
+    text-align: left;
+  }
+
+  .upload-zone.has-image:hover {
+    background: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .upload-icon {
+    font-family: 'Fraunces', serif;
+    font-size: 48px;
+    font-style: italic;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .upload-text {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-style: italic;
+    margin-bottom: 6px;
+  }
+
+  .upload-hint {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+  }
+
+  .preview-wrapper {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  @media (max-width: 600px) {
+    .preview-wrapper { grid-template-columns: 1fr; }
+  }
+
+  .preview-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border: 1px solid var(--line);
+  }
+
+  .analysis-area {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 13px;
+    font-style: italic;
+    font-family: 'Fraunces', serif;
+  }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--line);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .detected {
+    background: var(--moss-soft);
+    border-left: 3px solid var(--moss);
+    padding: 14px 16px;
+  }
+
+  .detected-name {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .detected-serving {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .macros-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 12px 0;
+  }
+
+  .macro-input {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    padding: 8px 10px;
+  }
+
+  .macro-input label {
+    display: block;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .macro-input input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+    outline: none;
+  }
+
+  .servings-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+
+  .servings-row label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+  }
+
+  .servings-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .servings-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    cursor: pointer;
+    font-size: 16px;
+    font-family: 'Fraunces', serif;
+    line-height: 1;
+    transition: all 0.15s;
+  }
+
+  .servings-btn:hover { background: var(--ink); color: var(--paper); }
+
+  .servings-input {
+    width: 70px;
+    text-align: center;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    padding: 5px;
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+    outline: none;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .btn {
+    padding: 12px 22px;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    transition: all 0.15s;
+  }
+
+  .btn:hover { background: var(--ink); color: var(--paper); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--paper);
+    border-color: var(--accent);
+  }
+
+  .btn-primary:hover { background: var(--ink); border-color: var(--ink); }
+
+  .btn-ghost {
+    border-color: var(--muted);
+    color: var(--muted);
+  }
+
+  .entries-section { margin-bottom: 48px; }
+
+  .entries-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .entry {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-bottom: none;
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: 60px 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    transition: background 0.15s;
+  }
+
+  .entry:last-child { border-bottom: 1px solid var(--line); }
+  .entry:hover { background: var(--bg); }
+
+  .entry-time {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+  }
+
+  .entry-info { min-width: 0; }
+
+  .entry-name {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .entry-detail {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .entry-detail .servings-badge {
+    background: var(--gold-soft);
+    color: var(--gold);
+    padding: 1px 6px;
+    margin-right: 6px;
+    font-weight: 500;
+  }
+
+  .entry-macros {
+    display: flex;
+    gap: 14px;
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+  }
+
+  @media (max-width: 700px) {
+    .entry { grid-template-columns: 1fr auto; }
+    .entry-time, .entry-macros { display: none; }
+  }
+
+  .entry-macro span {
+    display: block;
+    font-size: 8px;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-top: 2px;
+    font-weight: 400;
+  }
+
+  .delete-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 18px;
+    transition: all 0.15s;
+  }
+
+  .delete-btn:hover { color: var(--accent); }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+    font-style: italic;
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+  }
+
+  .history-section { margin-bottom: 24px; }
+
+  .history-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .history-tab {
+    padding: 10px 18px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+
+  .history-tab:hover { color: var(--ink); }
+
+  .history-tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+  }
+
+  .history-tab .cal {
+    color: var(--accent);
+    margin-left: 6px;
+    font-weight: 500;
+  }
+
+  .error {
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    color: var(--accent);
+    font-size: 13px;
+    font-style: italic;
+    font-family: 'Fraunces', serif;
+  }
+
+  .footnote {
+    text-align: center;
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+  }
+
+  .footnote .ornament {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--accent);
+    text-transform: none;
+    letter-spacing: 0;
+    margin: 0 8px;
+  }
+
+  .hidden-input { display: none; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+const STORAGE_KEY = 'nutrition_entries_v1';
+
+function App() {
+  const [allEntries, setAllEntries] = useState({});
+  const [viewDate, setViewDate] = useState(todayKey());
+  const [analysis, setAnalysis] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [error, setError] = useState('');
+  const [imagePreview, setImagePreview] = useState(null);
+  const [dragging, setDragging] = useState(false);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) setAllEntries(JSON.parse(raw));
+    } catch (e) {}
+  }, []);
+
+  function persistEntries(next) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch (e) {
+      console.error('Storage failed:', e);
+    }
+  }
+
+  function todayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function formatDateLabel(key) {
+    const [y, m, d] = key.split('-').map(Number);
+    const date = new Date(y, m-1, d);
+    const today = todayKey();
+    const yest = new Date(); yest.setDate(yest.getDate()-1);
+    const yestKey = `${yest.getFullYear()}-${String(yest.getMonth()+1).padStart(2,'0')}-${String(yest.getDate()).padStart(2,'0')}`;
+    if (key === today) return 'Today';
+    if (key === yestKey) return 'Yesterday';
+    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+
+  function formatFullDate(key) {
+    const [y, m, d] = key.split('-').map(Number);
+    return new Date(y, m-1, d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  }
+
+  function dayOfWeek(key) {
+    const [y, m, d] = key.split('-').map(Number);
+    return new Date(y, m-1, d).toLocaleDateString('en-US', { weekday: 'long' });
+  }
+
+  function handleFile(file) {
+    if (!file || !file.type.startsWith('image/')) {
+      setError('Please upload an image file');
+      return;
+    }
+    setError('');
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      setImagePreview(dataUrl);
+      const base64 = dataUrl.split(',')[1];
+      analyzeImage(base64, file.type);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function analyzeImage(base64, mediaType) {
+    setAnalyzing(true);
+    setAnalysis(null);
+    setError('');
+
+    try {
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64, mediaType }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}`);
+      }
+
+      const parsed = await response.json();
+
+      if (parsed.error) {
+        setError(parsed.error);
+        setAnalyzing(false);
+        // Still allow manual entry
+        setAnalysis({
+          name: 'New entry',
+          serving_description: '1 serving',
+          calories: 0,
+          protein_g: 0,
+          carbs_g: 0,
+          fat_g: 0,
+          confidence: 'low',
+          notes: 'Manually entered',
+          servings: 1,
+        });
+        return;
+      }
+
+      setAnalysis({
+        name: parsed.name || 'Unknown food',
+        serving_description: parsed.serving_description || '1 serving',
+        calories: Math.round(parsed.calories || 0),
+        protein_g: Math.round((parsed.protein_g || 0) * 10) / 10,
+        carbs_g: Math.round((parsed.carbs_g || 0) * 10) / 10,
+        fat_g: Math.round((parsed.fat_g || 0) * 10) / 10,
+        confidence: parsed.confidence || 'medium',
+        notes: parsed.notes || '',
+        servings: 1,
+      });
+    } catch (e) {
+      console.error(e);
+      setError('Could not analyze the image. You can still enter the values manually below.');
+      setAnalysis({
+        name: 'New entry',
+        serving_description: '1 serving',
+        calories: 0,
+        protein_g: 0,
+        carbs_g: 0,
+        fat_g: 0,
+        confidence: 'low',
+        notes: 'Manually entered',
+        servings: 1,
+      });
+    } finally {
+      setAnalyzing(false);
+    }
+  }
+
+  function updateAnalysisField(field, value) {
+    setAnalysis(a => ({ ...a, [field]: value }));
+  }
+
+  function updateServings(delta) {
+    setAnalysis(a => {
+      const next = Math.max(0.25, Math.round((a.servings + delta) * 4) / 4);
+      return { ...a, servings: next };
+    });
+  }
+
+  function setServings(value) {
+    const num = parseFloat(value);
+    if (isNaN(num) || num <= 0) return;
+    setAnalysis(a => ({ ...a, servings: num }));
+  }
+
+  function logEntry() {
+    if (!analysis) return;
+    const key = todayKey();
+    const entry = {
+      id: Date.now(),
+      time: new Date().toISOString(),
+      name: analysis.name,
+      serving_description: analysis.serving_description,
+      servings: analysis.servings,
+      calories: analysis.calories,
+      protein_g: analysis.protein_g,
+      carbs_g: analysis.carbs_g,
+      fat_g: analysis.fat_g,
+    };
+    const next = { ...allEntries, [key]: [...(allEntries[key] || []), entry] };
+    setAllEntries(next);
+    persistEntries(next);
+    resetForm();
+    setViewDate(key);
+  }
+
+  function deleteEntry(dateKey, id) {
+    const next = {
+      ...allEntries,
+      [dateKey]: (allEntries[dateKey] || []).filter(e => e.id !== id),
+    };
+    if (next[dateKey].length === 0) delete next[dateKey];
+    setAllEntries(next);
+    persistEntries(next);
+  }
+
+  function resetForm() {
+    setAnalysis(null);
+    setImagePreview(null);
+    setError('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
+
+  function totalsFor(dateKey) {
+    const entries = allEntries[dateKey] || [];
+    return entries.reduce((acc, e) => ({
+      calories: acc.calories + e.calories * e.servings,
+      protein_g: acc.protein_g + e.protein_g * e.servings,
+      carbs_g: acc.carbs_g + e.carbs_g * e.servings,
+      fat_g: acc.fat_g + e.fat_g * e.servings,
+    }), { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0 });
+  }
+
+  function formatTime(iso) {
+    return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  }
+
+  const totals = totalsFor(viewDate);
+  const viewEntries = allEntries[viewDate] || [];
+  const sortedDates = Object.keys(allEntries).sort((a, b) => b.localeCompare(a));
+  if (!sortedDates.includes(todayKey())) sortedDates.unshift(todayKey());
+
+  const cal = analysis ? Math.round(analysis.calories * analysis.servings) : 0;
+  const pro = analysis ? Math.round(analysis.protein_g * analysis.servings * 10) / 10 : 0;
+  const car = analysis ? Math.round(analysis.carbs_g * analysis.servings * 10) / 10 : 0;
+  const fat = analysis ? Math.round(analysis.fat_g * analysis.servings * 10) / 10 : 0;
+
+  return (
+    <div className="container">
+      <header>
+        <div>
+          <div className="brand">Fork <span className="amp">&amp;</span> Ledger</div>
+          <div className="tagline">A faithful record of what you consume</div>
+        </div>
+        <div className="date-display">
+          <div className="day">{dayOfWeek(viewDate)}</div>
+          <div className="full">{formatFullDate(viewDate)}</div>
+        </div>
+      </header>
+
+      <div className="totals">
+        <div className="stat calories">
+          <div className="stat-decoration">kcal</div>
+          <div className="stat-label">Calories</div>
+          <div className="stat-value">{Math.round(totals.calories)}</div>
+        </div>
+        <div className="stat">
+          <div className="stat-decoration">P</div>
+          <div className="stat-label">Protein</div>
+          <div className="stat-value">{Math.round(totals.protein_g)}<span className="unit">g</span></div>
+        </div>
+        <div className="stat">
+          <div className="stat-decoration">C</div>
+          <div className="stat-label">Carbs</div>
+          <div className="stat-value">{Math.round(totals.carbs_g)}<span className="unit">g</span></div>
+        </div>
+        <div className="stat">
+          <div className="stat-decoration">F</div>
+          <div className="stat-label">Fat</div>
+          <div className="stat-value">{Math.round(totals.fat_g)}<span className="unit">g</span></div>
+        </div>
+      </div>
+
+      {viewDate === todayKey() && (
+        <div className="upload-section">
+          <div className="section-title">
+            Add an entry
+            <span className="num">01 / capture</span>
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden-input"
+            onChange={(e) => e.target.files[0] && handleFile(e.target.files[0])}
+          />
+
+          {!imagePreview ? (
+            <div
+              className={`upload-zone ${dragging ? 'dragging' : ''}`}
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragging(false);
+                if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+              }}
+            >
+              <div className="upload-icon">+</div>
+              <div className="upload-text">Tap to take or upload a photo</div>
+              <div className="upload-hint">Food photo or nutrition label</div>
+            </div>
+          ) : (
+            <div className="upload-zone has-image">
+              <div className="preview-wrapper">
+                <img src={imagePreview} className="preview-image" alt="upload preview" />
+                <div className="analysis-area">
+                  {analyzing && (
+                    <div className="loading">
+                      <div className="spinner"></div>
+                      Reading the label, doing the arithmetic…
+                    </div>
+                  )}
+
+                  {error && <div className="error">{error}</div>}
+
+                  {analysis && (
+                    <>
+                      <div className="detected">
+                        <input
+                          style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none', fontFamily: 'Fraunces, serif', fontSize: '18px', fontWeight: 600, color: 'var(--ink)' }}
+                          value={analysis.name}
+                          onChange={(e) => updateAnalysisField('name', e.target.value)}
+                        />
+                        <div className="detected-serving">
+                          per {analysis.serving_description}
+                          {analysis.notes && ` · ${analysis.notes}`}
+                        </div>
+                      </div>
+
+                      <div className="macros-grid">
+                        <div className="macro-input">
+                          <label>Cal</label>
+                          <input type="number" inputMode="decimal" value={analysis.calories} onChange={(e) => updateAnalysisField('calories', parseFloat(e.target.value) || 0)} />
+                        </div>
+                        <div className="macro-input">
+                          <label>Pro (g)</label>
+                          <input type="number" inputMode="decimal" step="0.1" value={analysis.protein_g} onChange={(e) => updateAnalysisField('protein_g', parseFloat(e.target.value) || 0)} />
+                        </div>
+                        <div className="macro-input">
+                          <label>Carb (g)</label>
+                          <input type="number" inputMode="decimal" step="0.1" value={analysis.carbs_g} onChange={(e) => updateAnalysisField('carbs_g', parseFloat(e.target.value) || 0)} />
+                        </div>
+                        <div className="macro-input">
+                          <label>Fat (g)</label>
+                          <input type="number" inputMode="decimal" step="0.1" value={analysis.fat_g} onChange={(e) => updateAnalysisField('fat_g', parseFloat(e.target.value) || 0)} />
+                        </div>
+                      </div>
+
+                      <div className="servings-row">
+                        <label>Servings</label>
+                        <div className="servings-control">
+                          <button className="servings-btn" onClick={() => updateServings(-0.25)}>−</button>
+                          <input className="servings-input" type="number" inputMode="decimal" step="0.25" value={analysis.servings} onChange={(e) => setServings(e.target.value)} />
+                          <button className="servings-btn" onClick={() => updateServings(0.25)}>+</button>
+                        </div>
+                        <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
+                          <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--muted)' }}>Will log</div>
+                          <div style={{ fontFamily: 'Fraunces, serif', fontWeight: 600, fontSize: '20px' }}>
+                            {cal} <span style={{ fontSize: '11px', color: 'var(--muted)', fontFamily: 'DM Mono, monospace', fontWeight: 400 }}>kcal</span>
+                            <span style={{ fontSize: '12px', color: 'var(--muted)', marginLeft: '10px', fontFamily: 'DM Mono, monospace', fontWeight: 400 }}>{pro}p · {car}c · {fat}f</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="action-buttons">
+                        <button className="btn btn-primary" onClick={logEntry}>Log it</button>
+                        <button className="btn btn-ghost" onClick={resetForm}>Discard</button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="entries-section">
+        <div className="section-title">
+          {viewDate === todayKey() ? "Today's ledger" : `Ledger · ${formatDateLabel(viewDate)}`}
+          <span className="num">02 / record</span>
+        </div>
+
+        {viewEntries.length === 0 ? (
+          <div className="empty-state">— nothing logged yet —</div>
+        ) : (
+          <div className="entries-list">
+            {viewEntries.map(entry => (
+              <div key={entry.id} className="entry">
+                <div className="entry-time">{formatTime(entry.time)}</div>
+                <div className="entry-info">
+                  <div className="entry-name">{entry.name}</div>
+                  <div className="entry-detail">
+                    <span className="servings-badge">×{entry.servings}</span>
+                    {entry.serving_description}
+                  </div>
+                </div>
+                <div className="entry-macros">
+                  <div className="entry-macro">{Math.round(entry.calories * entry.servings)}<span>kcal</span></div>
+                  <div className="entry-macro">{Math.round(entry.protein_g * entry.servings * 10) / 10}<span>protein</span></div>
+                  <div className="entry-macro">{Math.round(entry.carbs_g * entry.servings * 10) / 10}<span>carbs</span></div>
+                  <div className="entry-macro">{Math.round(entry.fat_g * entry.servings * 10) / 10}<span>fat</span></div>
+                </div>
+                <button className="delete-btn" onClick={() => deleteEntry(viewDate, entry.id)} title="Remove">✕</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {sortedDates.length > 1 && (
+        <div className="history-section">
+          <div className="section-title">
+            History
+            <span className="num">03 / archive</span>
+          </div>
+          <div className="history-tabs">
+            {sortedDates.map(key => {
+              const t = totalsFor(key);
+              return (
+                <button key={key} className={`history-tab ${viewDate === key ? 'active' : ''}`} onClick={() => setViewDate(key)}>
+                  {formatDateLabel(key)}
+                  <span className="cal">{Math.round(t.calories)}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="footnote">
+        Kept honestly <span className="ornament">·</span> Updated as you eat
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.render(<App />, document.getElementById('app'));
+</script>
+</body>
+</html>

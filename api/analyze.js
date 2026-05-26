@@ -108,7 +108,6 @@ Remember: ONLY the JSON object. No other text.`,
       .join('')
       .trim();
 
-    // Strip markdown fences if present, then find the JSON object
     let cleaned = text.replace(/```json|```/g, '').trim();
     const firstBrace = cleaned.indexOf('{');
     const lastBrace = cleaned.lastIndexOf('}');

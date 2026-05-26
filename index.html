@@ -7,8 +7,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="Fork & Ledger" />
 <meta name="theme-color" content="#f4f1ea" />
-<link rel="apple-touch-icon" href="/icon.png" />
-<link rel="manifest" href="/manifest.json" />
 <title>Fork & Ledger</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -74,11 +72,7 @@
     font-style: italic;
   }
 
-  .brand .amp {
-    color: var(--accent);
-    font-style: normal;
-    font-weight: 400;
-  }
+  .brand .amp { color: var(--accent); font-style: normal; font-weight: 400; }
 
   .tagline {
     font-size: 11px;
@@ -88,11 +82,7 @@
     margin-top: 8px;
   }
 
-  .date-display {
-    text-align: right;
-    font-family: 'Fraunces', serif;
-    font-weight: 500;
-  }
+  .date-display { text-align: right; font-family: 'Fraunces', serif; font-weight: 500; }
 
   .date-display .day {
     font-size: 13px;
@@ -102,10 +92,35 @@
     font-family: 'DM Mono', monospace;
   }
 
-  .date-display .full {
-    font-size: 22px;
+  .date-display .full { font-size: 22px; font-style: italic; margin-top: 4px; }
+
+  .past-banner {
+    background: var(--gold-soft);
+    border-left: 3px solid var(--gold);
+    padding: 10px 14px;
+    margin-bottom: 24px;
+    font-family: 'Fraunces', serif;
     font-style: italic;
-    margin-top: 4px;
+    font-size: 14px;
+    color: var(--ink);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .past-banner button {
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    padding: 6px 14px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink);
+    font-style: normal;
   }
 
   .totals {
@@ -128,11 +143,7 @@
     box-shadow: var(--shadow);
   }
 
-  .stat.calories {
-    background: var(--ink);
-    color: var(--paper);
-    border-color: var(--ink);
-  }
+  .stat.calories { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
   .stat-label {
     font-size: 10px;
@@ -209,10 +220,7 @@
     position: relative;
   }
 
-  .upload-zone:hover {
-    background: var(--accent-soft);
-    border-color: var(--accent);
-  }
+  .upload-zone:hover { background: var(--accent-soft); border-color: var(--accent); }
 
   .upload-zone.dragging {
     background: var(--accent-soft);
@@ -226,10 +234,7 @@
     text-align: left;
   }
 
-  .upload-zone.has-image:hover {
-    background: var(--paper);
-    border-color: var(--ink);
-  }
+  .upload-zone.has-image:hover { background: var(--paper); border-color: var(--ink); }
 
   .upload-icon {
     font-family: 'Fraunces', serif;
@@ -251,6 +256,14 @@
     text-transform: uppercase;
     letter-spacing: 0.2em;
     color: var(--muted);
+  }
+
+  .upload-secondary {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
   }
 
   .preview-wrapper {
@@ -305,18 +318,12 @@
     padding: 14px 16px;
   }
 
-  .detected-name {
-    font-family: 'Fraunces', serif;
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-
   .detected-serving {
     font-size: 11px;
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 0.1em;
+    margin-top: 4px;
   }
 
   .macros-grid {
@@ -369,11 +376,7 @@
     color: var(--muted);
   }
 
-  .servings-control {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .servings-control { display: flex; align-items: center; gap: 8px; }
 
   .servings-btn {
     width: 32px;
@@ -401,11 +404,7 @@
     outline: none;
   }
 
-  .action-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 4px;
-  }
+  .action-buttons { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
 
   .btn {
     padding: 12px 22px;
@@ -429,18 +428,11 @@
 
   .btn-primary:hover { background: var(--ink); border-color: var(--ink); }
 
-  .btn-ghost {
-    border-color: var(--muted);
-    color: var(--muted);
-  }
+  .btn-ghost { border-color: var(--muted); color: var(--muted); }
 
   .entries-section { margin-bottom: 48px; }
 
-  .entries-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
+  .entries-list { display: flex; flex-direction: column; gap: 0; }
 
   .entry {
     background: var(--paper);
@@ -448,7 +440,7 @@
     border-bottom: none;
     padding: 16px 20px;
     display: grid;
-    grid-template-columns: 60px 1fr auto auto;
+    grid-template-columns: 60px 1fr auto auto auto;
     gap: 16px;
     align-items: center;
     transition: background 0.15s;
@@ -476,10 +468,7 @@
     white-space: nowrap;
   }
 
-  .entry-detail {
-    font-size: 11px;
-    color: var(--muted);
-  }
+  .entry-detail { font-size: 11px; color: var(--muted); }
 
   .entry-detail .servings-badge {
     background: var(--gold-soft);
@@ -489,15 +478,10 @@
     font-weight: 500;
   }
 
-  .entry-macros {
-    display: flex;
-    gap: 14px;
-    font-family: 'Fraunces', serif;
-    font-size: 14px;
-  }
+  .entry-macros { display: flex; gap: 14px; font-family: 'Fraunces', serif; font-size: 14px; }
 
   @media (max-width: 700px) {
-    .entry { grid-template-columns: 1fr auto; }
+    .entry { grid-template-columns: 1fr auto auto; }
     .entry-time, .entry-macros { display: none; }
   }
 
@@ -512,7 +496,7 @@
     font-weight: 400;
   }
 
-  .delete-btn {
+  .icon-btn {
     width: 32px;
     height: 32px;
     border: none;
@@ -523,9 +507,48 @@
     font-style: italic;
     font-size: 18px;
     transition: all 0.15s;
+    line-height: 1;
   }
 
-  .delete-btn:hover { color: var(--accent); }
+  .icon-btn:hover { color: var(--accent); }
+  .icon-btn.edit { font-size: 16px; }
+
+  .entry-editor {
+    background: var(--moss-soft);
+    border: 1px solid var(--moss);
+    padding: 16px 20px;
+    margin-bottom: -1px;
+  }
+
+  .editor-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .editor-row label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    min-width: 60px;
+  }
+
+  .editor-row input {
+    border: 1px solid var(--line);
+    background: var(--paper);
+    padding: 6px 10px;
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    font-weight: 600;
+    outline: none;
+    color: var(--ink);
+  }
+
+  .editor-row input[type="text"] { flex: 1; min-width: 150px; }
+  .editor-row input[type="number"] { width: 80px; }
 
   .empty-state {
     text-align: center;
@@ -565,16 +588,9 @@
 
   .history-tab:hover { color: var(--ink); }
 
-  .history-tab.active {
-    color: var(--ink);
-    border-bottom-color: var(--accent);
-  }
+  .history-tab.active { color: var(--ink); border-bottom-color: var(--accent); }
 
-  .history-tab .cal {
-    color: var(--accent);
-    margin-left: 6px;
-    font-weight: 500;
-  }
+  .history-tab .cal { color: var(--accent); margin-left: 6px; font-weight: 500; }
 
   .error {
     background: var(--accent-soft);
@@ -616,6 +632,8 @@
 const { useState, useEffect, useRef } = React;
 
 const STORAGE_KEY = 'nutrition_entries_v1';
+const MAX_IMAGE_DIMENSION = 1568; // Anthropic vision recommended max
+const JPEG_QUALITY = 0.85;
 
 function App() {
   const [allEntries, setAllEntries] = useState({});
@@ -625,6 +643,8 @@ function App() {
   const [error, setError] = useState('');
   const [imagePreview, setImagePreview] = useState(null);
   const [dragging, setDragging] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [editDraft, setEditDraft] = useState(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -668,20 +688,54 @@ function App() {
     return new Date(y, m-1, d).toLocaleDateString('en-US', { weekday: 'long' });
   }
 
-  function handleFile(file) {
+  // Resize image client-side before sending — iPhone photos are huge
+  async function resizeImage(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          const max = MAX_IMAGE_DIMENSION;
+          if (width > max || height > max) {
+            if (width > height) {
+              height = Math.round(height * (max / width));
+              width = max;
+            } else {
+              width = Math.round(width * (max / height));
+              height = max;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+          resolve({ dataUrl, base64: dataUrl.split(',')[1], mediaType: 'image/jpeg' });
+        };
+        img.onerror = () => reject(new Error('Could not load image'));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error('Could not read file'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handleFile(file) {
     if (!file || !file.type.startsWith('image/')) {
       setError('Please upload an image file');
       return;
     }
     setError('');
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target.result;
+    try {
+      const { dataUrl, base64, mediaType } = await resizeImage(file);
       setImagePreview(dataUrl);
-      const base64 = dataUrl.split(',')[1];
-      analyzeImage(base64, file.type);
-    };
-    reader.readAsDataURL(file);
+      analyzeImage(base64, mediaType);
+    } catch (e) {
+      console.error(e);
+      setError('Could not process the image. Try a different photo.');
+    }
   }
 
   async function analyzeImage(base64, mediaType) {
@@ -696,27 +750,23 @@ function App() {
         body: JSON.stringify({ image: base64, mediaType }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Server returned ${response.status}`);
+      const responseText = await response.text();
+      let parsed;
+      try {
+        parsed = JSON.parse(responseText);
+      } catch (e) {
+        throw new Error(`Server returned non-JSON: ${responseText.slice(0, 100)}`);
       }
 
-      const parsed = await response.json();
+      if (!response.ok) {
+        const detail = parsed.detail ? ` (${parsed.detail.slice(0, 100)})` : '';
+        throw new Error((parsed.error || 'Analysis failed') + detail);
+      }
 
       if (parsed.error) {
-        setError(parsed.error);
+        setError(`Claude says: ${parsed.error}. You can still enter values manually.`);
+        setAnalysis(blankAnalysis());
         setAnalyzing(false);
-        // Still allow manual entry
-        setAnalysis({
-          name: 'New entry',
-          serving_description: '1 serving',
-          calories: 0,
-          protein_g: 0,
-          carbs_g: 0,
-          fat_g: 0,
-          confidence: 'low',
-          notes: 'Manually entered',
-          servings: 1,
-        });
         return;
       }
 
@@ -733,21 +783,31 @@ function App() {
       });
     } catch (e) {
       console.error(e);
-      setError('Could not analyze the image. You can still enter the values manually below.');
-      setAnalysis({
-        name: 'New entry',
-        serving_description: '1 serving',
-        calories: 0,
-        protein_g: 0,
-        carbs_g: 0,
-        fat_g: 0,
-        confidence: 'low',
-        notes: 'Manually entered',
-        servings: 1,
-      });
+      setError(`Could not analyze: ${e.message}. Enter values manually below.`);
+      setAnalysis(blankAnalysis());
     } finally {
       setAnalyzing(false);
     }
+  }
+
+  function blankAnalysis() {
+    return {
+      name: 'New entry',
+      serving_description: '1 serving',
+      calories: 0,
+      protein_g: 0,
+      carbs_g: 0,
+      fat_g: 0,
+      confidence: 'low',
+      notes: 'Manually entered',
+      servings: 1,
+    };
+  }
+
+  function startManualEntry() {
+    setImagePreview(null);
+    setError('');
+    setAnalysis(blankAnalysis());
   }
 
   function updateAnalysisField(field, value) {
@@ -769,7 +829,6 @@ function App() {
 
   function logEntry() {
     if (!analysis) return;
-    const key = todayKey();
     const entry = {
       id: Date.now(),
       time: new Date().toISOString(),
@@ -781,11 +840,10 @@ function App() {
       carbs_g: analysis.carbs_g,
       fat_g: analysis.fat_g,
     };
-    const next = { ...allEntries, [key]: [...(allEntries[key] || []), entry] };
+    const next = { ...allEntries, [viewDate]: [...(allEntries[viewDate] || []), entry] };
     setAllEntries(next);
     persistEntries(next);
     resetForm();
-    setViewDate(key);
   }
 
   function deleteEntry(dateKey, id) {
@@ -796,6 +854,32 @@ function App() {
     if (next[dateKey].length === 0) delete next[dateKey];
     setAllEntries(next);
     persistEntries(next);
+  }
+
+  function startEdit(entry) {
+    setEditingId(entry.id);
+    setEditDraft({ ...entry });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditDraft(null);
+  }
+
+  function saveEdit(dateKey) {
+    const next = {
+      ...allEntries,
+      [dateKey]: (allEntries[dateKey] || []).map(e =>
+        e.id === editingId ? { ...editDraft } : e
+      ),
+    };
+    setAllEntries(next);
+    persistEntries(next);
+    cancelEdit();
+  }
+
+  function updateEditField(field, value) {
+    setEditDraft(d => ({ ...d, [field]: value }));
   }
 
   function resetForm() {
@@ -823,6 +907,7 @@ function App() {
   const viewEntries = allEntries[viewDate] || [];
   const sortedDates = Object.keys(allEntries).sort((a, b) => b.localeCompare(a));
   if (!sortedDates.includes(todayKey())) sortedDates.unshift(todayKey());
+  const isPast = viewDate !== todayKey();
 
   const cal = analysis ? Math.round(analysis.calories * analysis.servings) : 0;
   const pro = analysis ? Math.round(analysis.protein_g * analysis.servings * 10) / 10 : 0;
@@ -841,6 +926,13 @@ function App() {
           <div className="full">{formatFullDate(viewDate)}</div>
         </div>
       </header>
+
+      {isPast && (
+        <div className="past-banner">
+          <span>You're viewing {formatDateLabel(viewDate)} — additions and edits land on this date.</span>
+          <button onClick={() => setViewDate(todayKey())}>Back to today</button>
+        </div>
+      )}
 
       <div className="totals">
         <div className="stat calories">
@@ -865,22 +957,22 @@ function App() {
         </div>
       </div>
 
-      {viewDate === todayKey() && (
-        <div className="upload-section">
-          <div className="section-title">
-            Add an entry
-            <span className="num">01 / capture</span>
-          </div>
+      <div className="upload-section">
+        <div className="section-title">
+          {isPast ? `Add to ${formatDateLabel(viewDate)}` : 'Add an entry'}
+          <span className="num">01 / capture</span>
+        </div>
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden-input"
-            onChange={(e) => e.target.files[0] && handleFile(e.target.files[0])}
-          />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden-input"
+          onChange={(e) => e.target.files[0] && handleFile(e.target.files[0])}
+        />
 
-          {!imagePreview ? (
+        {!imagePreview && !analysis ? (
+          <>
             <div
               className={`upload-zone ${dragging ? 'dragging' : ''}`}
               onClick={() => fileInputRef.current?.click()}
@@ -893,84 +985,95 @@ function App() {
               }}
             >
               <div className="upload-icon">+</div>
-              <div className="upload-text">Tap to take or upload a photo</div>
+              <div className="upload-text">Tap to upload or take a photo</div>
               <div className="upload-hint">Food photo or nutrition label</div>
             </div>
-          ) : (
-            <div className="upload-zone has-image">
-              <div className="preview-wrapper">
+            <div className="upload-secondary">
+              <button className="btn btn-ghost" onClick={startManualEntry}>Enter manually</button>
+            </div>
+          </>
+        ) : (
+          <div className="upload-zone has-image">
+            <div className="preview-wrapper">
+              {imagePreview ? (
                 <img src={imagePreview} className="preview-image" alt="upload preview" />
-                <div className="analysis-area">
-                  {analyzing && (
-                    <div className="loading">
-                      <div className="spinner"></div>
-                      Reading the label, doing the arithmetic…
-                    </div>
-                  )}
+              ) : (
+                <div className="preview-image" style={{ background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Fraunces, serif', fontStyle: 'italic', color: 'var(--muted)', fontSize: '14px' }}>manual entry</div>
+              )}
+              <div className="analysis-area">
+                {analyzing && (
+                  <div className="loading">
+                    <div className="spinner"></div>
+                    Reading the label, doing the arithmetic…
+                  </div>
+                )}
 
-                  {error && <div className="error">{error}</div>}
+                {error && <div className="error">{error}</div>}
 
-                  {analysis && (
-                    <>
-                      <div className="detected">
-                        <input
-                          style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none', fontFamily: 'Fraunces, serif', fontSize: '18px', fontWeight: 600, color: 'var(--ink)' }}
-                          value={analysis.name}
-                          onChange={(e) => updateAnalysisField('name', e.target.value)}
+                {analysis && (
+                  <>
+                    <div className="detected">
+                      <input
+                        style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none', fontFamily: 'Fraunces, serif', fontSize: '18px', fontWeight: 600, color: 'var(--ink)' }}
+                        value={analysis.name}
+                        onChange={(e) => updateAnalysisField('name', e.target.value)}
+                      />
+                      <div className="detected-serving">
+                        per <input
+                          style={{ border: 'none', background: 'transparent', outline: 'none', fontFamily: 'DM Mono, monospace', fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', width: '60%' }}
+                          value={analysis.serving_description}
+                          onChange={(e) => updateAnalysisField('serving_description', e.target.value)}
                         />
-                        <div className="detected-serving">
-                          per {analysis.serving_description}
-                          {analysis.notes && ` · ${analysis.notes}`}
-                        </div>
+                        {analysis.notes && <div style={{ marginTop: 4, fontStyle: 'italic' }}>· {analysis.notes}</div>}
                       </div>
+                    </div>
 
-                      <div className="macros-grid">
-                        <div className="macro-input">
-                          <label>Cal</label>
-                          <input type="number" inputMode="decimal" value={analysis.calories} onChange={(e) => updateAnalysisField('calories', parseFloat(e.target.value) || 0)} />
-                        </div>
-                        <div className="macro-input">
-                          <label>Pro (g)</label>
-                          <input type="number" inputMode="decimal" step="0.1" value={analysis.protein_g} onChange={(e) => updateAnalysisField('protein_g', parseFloat(e.target.value) || 0)} />
-                        </div>
-                        <div className="macro-input">
-                          <label>Carb (g)</label>
-                          <input type="number" inputMode="decimal" step="0.1" value={analysis.carbs_g} onChange={(e) => updateAnalysisField('carbs_g', parseFloat(e.target.value) || 0)} />
-                        </div>
-                        <div className="macro-input">
-                          <label>Fat (g)</label>
-                          <input type="number" inputMode="decimal" step="0.1" value={analysis.fat_g} onChange={(e) => updateAnalysisField('fat_g', parseFloat(e.target.value) || 0)} />
-                        </div>
+                    <div className="macros-grid">
+                      <div className="macro-input">
+                        <label>Cal</label>
+                        <input type="number" inputMode="decimal" value={analysis.calories} onChange={(e) => updateAnalysisField('calories', parseFloat(e.target.value) || 0)} />
                       </div>
+                      <div className="macro-input">
+                        <label>Pro (g)</label>
+                        <input type="number" inputMode="decimal" step="0.1" value={analysis.protein_g} onChange={(e) => updateAnalysisField('protein_g', parseFloat(e.target.value) || 0)} />
+                      </div>
+                      <div className="macro-input">
+                        <label>Carb (g)</label>
+                        <input type="number" inputMode="decimal" step="0.1" value={analysis.carbs_g} onChange={(e) => updateAnalysisField('carbs_g', parseFloat(e.target.value) || 0)} />
+                      </div>
+                      <div className="macro-input">
+                        <label>Fat (g)</label>
+                        <input type="number" inputMode="decimal" step="0.1" value={analysis.fat_g} onChange={(e) => updateAnalysisField('fat_g', parseFloat(e.target.value) || 0)} />
+                      </div>
+                    </div>
 
-                      <div className="servings-row">
-                        <label>Servings</label>
-                        <div className="servings-control">
-                          <button className="servings-btn" onClick={() => updateServings(-0.25)}>−</button>
-                          <input className="servings-input" type="number" inputMode="decimal" step="0.25" value={analysis.servings} onChange={(e) => setServings(e.target.value)} />
-                          <button className="servings-btn" onClick={() => updateServings(0.25)}>+</button>
-                        </div>
-                        <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
-                          <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--muted)' }}>Will log</div>
-                          <div style={{ fontFamily: 'Fraunces, serif', fontWeight: 600, fontSize: '20px' }}>
-                            {cal} <span style={{ fontSize: '11px', color: 'var(--muted)', fontFamily: 'DM Mono, monospace', fontWeight: 400 }}>kcal</span>
-                            <span style={{ fontSize: '12px', color: 'var(--muted)', marginLeft: '10px', fontFamily: 'DM Mono, monospace', fontWeight: 400 }}>{pro}p · {car}c · {fat}f</span>
-                          </div>
+                    <div className="servings-row">
+                      <label>Servings</label>
+                      <div className="servings-control">
+                        <button className="servings-btn" onClick={() => updateServings(-0.25)}>−</button>
+                        <input className="servings-input" type="number" inputMode="decimal" step="0.25" value={analysis.servings} onChange={(e) => setServings(e.target.value)} />
+                        <button className="servings-btn" onClick={() => updateServings(0.25)}>+</button>
+                      </div>
+                      <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
+                        <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--muted)' }}>Will log</div>
+                        <div style={{ fontFamily: 'Fraunces, serif', fontWeight: 600, fontSize: '20px' }}>
+                          {cal} <span style={{ fontSize: '11px', color: 'var(--muted)', fontFamily: 'DM Mono, monospace', fontWeight: 400 }}>kcal</span>
+                          <span style={{ fontSize: '12px', color: 'var(--muted)', marginLeft: '10px', fontFamily: 'DM Mono, monospace', fontWeight: 400 }}>{pro}p · {car}c · {fat}f</span>
                         </div>
                       </div>
+                    </div>
 
-                      <div className="action-buttons">
-                        <button className="btn btn-primary" onClick={logEntry}>Log it</button>
-                        <button className="btn btn-ghost" onClick={resetForm}>Discard</button>
-                      </div>
-                    </>
-                  )}
-                </div>
+                    <div className="action-buttons">
+                      <button className="btn btn-primary" onClick={logEntry}>Log it</button>
+                      <button className="btn btn-ghost" onClick={resetForm}>Discard</button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
 
       <div className="entries-section">
         <div className="section-title">
@@ -983,23 +1086,57 @@ function App() {
         ) : (
           <div className="entries-list">
             {viewEntries.map(entry => (
-              <div key={entry.id} className="entry">
-                <div className="entry-time">{formatTime(entry.time)}</div>
-                <div className="entry-info">
-                  <div className="entry-name">{entry.name}</div>
-                  <div className="entry-detail">
-                    <span className="servings-badge">×{entry.servings}</span>
-                    {entry.serving_description}
+              <React.Fragment key={entry.id}>
+                {editingId === entry.id ? (
+                  <div className="entry-editor">
+                    <div className="editor-row">
+                      <label>Name</label>
+                      <input type="text" value={editDraft.name} onChange={(e) => updateEditField('name', e.target.value)} />
+                    </div>
+                    <div className="editor-row">
+                      <label>Serving</label>
+                      <input type="text" value={editDraft.serving_description} onChange={(e) => updateEditField('serving_description', e.target.value)} />
+                    </div>
+                    <div className="editor-row">
+                      <label>Cal</label>
+                      <input type="number" inputMode="decimal" value={editDraft.calories} onChange={(e) => updateEditField('calories', parseFloat(e.target.value) || 0)} />
+                      <label>Pro</label>
+                      <input type="number" inputMode="decimal" step="0.1" value={editDraft.protein_g} onChange={(e) => updateEditField('protein_g', parseFloat(e.target.value) || 0)} />
+                      <label>Carb</label>
+                      <input type="number" inputMode="decimal" step="0.1" value={editDraft.carbs_g} onChange={(e) => updateEditField('carbs_g', parseFloat(e.target.value) || 0)} />
+                      <label>Fat</label>
+                      <input type="number" inputMode="decimal" step="0.1" value={editDraft.fat_g} onChange={(e) => updateEditField('fat_g', parseFloat(e.target.value) || 0)} />
+                    </div>
+                    <div className="editor-row">
+                      <label>Servings</label>
+                      <input type="number" inputMode="decimal" step="0.25" value={editDraft.servings} onChange={(e) => updateEditField('servings', parseFloat(e.target.value) || 1)} />
+                      <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+                        <button className="btn btn-primary" onClick={() => saveEdit(viewDate)}>Save</button>
+                        <button className="btn btn-ghost" onClick={cancelEdit}>Cancel</button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="entry-macros">
-                  <div className="entry-macro">{Math.round(entry.calories * entry.servings)}<span>kcal</span></div>
-                  <div className="entry-macro">{Math.round(entry.protein_g * entry.servings * 10) / 10}<span>protein</span></div>
-                  <div className="entry-macro">{Math.round(entry.carbs_g * entry.servings * 10) / 10}<span>carbs</span></div>
-                  <div className="entry-macro">{Math.round(entry.fat_g * entry.servings * 10) / 10}<span>fat</span></div>
-                </div>
-                <button className="delete-btn" onClick={() => deleteEntry(viewDate, entry.id)} title="Remove">✕</button>
-              </div>
+                ) : (
+                  <div className="entry">
+                    <div className="entry-time">{formatTime(entry.time)}</div>
+                    <div className="entry-info">
+                      <div className="entry-name">{entry.name}</div>
+                      <div className="entry-detail">
+                        <span className="servings-badge">×{entry.servings}</span>
+                        {entry.serving_description}
+                      </div>
+                    </div>
+                    <div className="entry-macros">
+                      <div className="entry-macro">{Math.round(entry.calories * entry.servings)}<span>kcal</span></div>
+                      <div className="entry-macro">{Math.round(entry.protein_g * entry.servings * 10) / 10}<span>protein</span></div>
+                      <div className="entry-macro">{Math.round(entry.carbs_g * entry.servings * 10) / 10}<span>carbs</span></div>
+                      <div className="entry-macro">{Math.round(entry.fat_g * entry.servings * 10) / 10}<span>fat</span></div>
+                    </div>
+                    <button className="icon-btn edit" onClick={() => startEdit(entry)} title="Edit">✎</button>
+                    <button className="icon-btn" onClick={() => deleteEntry(viewDate, entry.id)} title="Remove">✕</button>
+                  </div>
+                )}
+              </React.Fragment>
             ))}
           </div>
         )}
@@ -1015,7 +1152,7 @@ function App() {
             {sortedDates.map(key => {
               const t = totalsFor(key);
               return (
-                <button key={key} className={`history-tab ${viewDate === key ? 'active' : ''}`} onClick={() => setViewDate(key)}>
+                <button key={key} className={`history-tab ${viewDate === key ? 'active' : ''}`} onClick={() => { setViewDate(key); cancelEdit(); resetForm(); }}>
                   {formatDateLabel(key)}
                   <span className="cal">{Math.round(t.calories)}</span>
                 </button>

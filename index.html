@@ -127,7 +127,7 @@
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1fr;
     gap: 16px;
-    margin-bottom: 48px;
+    margin-bottom: 16px;
   }
 
   @media (max-width: 700px) {
@@ -137,7 +137,7 @@
   .stat {
     background: var(--paper);
     border: 1px solid var(--line);
-    padding: 24px;
+    padding: 20px 22px 18px;
     position: relative;
     overflow: hidden;
     box-shadow: var(--shadow);
@@ -150,30 +150,39 @@
     text-transform: uppercase;
     letter-spacing: 0.25em;
     opacity: 0.6;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   .stat-value {
     font-family: 'Fraunces', serif;
     font-weight: 600;
-    font-size: clamp(36px, 5vw, 56px);
+    font-size: clamp(32px, 4.5vw, 48px);
     line-height: 1;
     letter-spacing: -0.02em;
   }
 
   .stat-value .unit {
-    font-size: 14px;
+    font-size: 13px;
     font-family: 'DM Mono', monospace;
     font-weight: 400;
     opacity: 0.5;
-    margin-left: 6px;
+    margin-left: 4px;
+    letter-spacing: 0;
+  }
+
+  .stat-value .of {
+    font-size: 14px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 400;
+    opacity: 0.4;
+    margin-left: 8px;
     letter-spacing: 0;
   }
 
   .stat-decoration {
     position: absolute;
-    top: 24px;
-    right: 24px;
+    top: 20px;
+    right: 22px;
     font-family: 'Fraunces', serif;
     font-style: italic;
     font-size: 14px;
@@ -181,6 +190,113 @@
   }
 
   .stat.calories .stat-decoration { color: var(--accent); opacity: 0.9; }
+
+  .stat-gap {
+    margin-top: 8px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    opacity: 0.7;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .stat-gap .gap-num { font-weight: 500; }
+  .stat-gap.over { color: var(--accent); opacity: 1; }
+  .stat.calories .stat-gap.over { color: #ff8a5e; }
+
+  .progress-bar {
+    margin-top: 12px;
+    height: 3px;
+    background: rgba(0,0,0,0.08);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat.calories .progress-bar { background: rgba(255,255,255,0.12); }
+
+  .progress-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: var(--moss);
+    transition: width 0.4s ease;
+  }
+
+  .stat.calories .progress-fill { background: var(--accent); }
+  .progress-fill.over { background: var(--accent); }
+  .stat.calories .progress-fill.over { background: #ff8a5e; }
+
+  .targets-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 32px;
+  }
+
+  .targets-toggle {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    padding: 4px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .targets-toggle:hover { color: var(--ink); }
+  .targets-toggle .arrow {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .targets-editor {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 18px 20px;
+    margin-bottom: 32px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  @media (max-width: 700px) {
+    .targets-editor { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .target-field label {
+    display: block;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .target-field input {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    padding: 8px 10px;
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+    outline: none;
+  }
+
+  .target-field input:focus { border-color: var(--ink); }
+
+  .targets-save-row {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    padding-top: 4px;
+  }
 
   .upload-section { margin-bottom: 48px; }
 
@@ -430,6 +546,8 @@
 
   .btn-ghost { border-color: var(--muted); color: var(--muted); }
 
+  .btn-small { padding: 8px 14px; font-size: 10px; }
+
   .entries-section { margin-bottom: 48px; }
 
   .entries-list { display: flex; flex-direction: column; gap: 0; }
@@ -632,11 +750,22 @@
 const { useState, useEffect, useRef } = React;
 
 const STORAGE_KEY = 'nutrition_entries_v1';
-const MAX_IMAGE_DIMENSION = 1568; // Anthropic vision recommended max
-const JPEG_QUALITY = 0.85;
+const TARGETS_KEY = 'nutrition_targets_v1';
+const MAX_IMAGE_DIMENSION = 1024;
+const JPEG_QUALITY = 0.75;
+
+const DEFAULT_TARGETS = {
+  calories: 1725,
+  protein_g: 185,
+  carbs_g: 100,
+  fat_g: 65,
+};
 
 function App() {
   const [allEntries, setAllEntries] = useState({});
+  const [targets, setTargets] = useState(DEFAULT_TARGETS);
+  const [editingTargets, setEditingTargets] = useState(false);
+  const [draftTargets, setDraftTargets] = useState(DEFAULT_TARGETS);
   const [viewDate, setViewDate] = useState(todayKey());
   const [analysis, setAnalysis] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -652,14 +781,24 @@ function App() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setAllEntries(JSON.parse(raw));
     } catch (e) {}
+    try {
+      const t = localStorage.getItem(TARGETS_KEY);
+      if (t) {
+        const parsed = JSON.parse(t);
+        setTargets(parsed);
+        setDraftTargets(parsed);
+      }
+    } catch (e) {}
   }, []);
 
   function persistEntries(next) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    } catch (e) {
-      console.error('Storage failed:', e);
-    }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); }
+    catch (e) { console.error('Storage failed:', e); }
+  }
+
+  function persistTargets(next) {
+    try { localStorage.setItem(TARGETS_KEY, JSON.stringify(next)); }
+    catch (e) { console.error('Storage failed:', e); }
   }
 
   function todayKey() {
@@ -688,7 +827,6 @@ function App() {
     return new Date(y, m-1, d).toLocaleDateString('en-US', { weekday: 'long' });
   }
 
-  // Resize image client-side before sending — iPhone photos are huge
   async function resizeImage(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -889,6 +1027,23 @@ function App() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
+  function saveTargets() {
+    const cleaned = {
+      calories: Math.max(0, parseFloat(draftTargets.calories) || 0),
+      protein_g: Math.max(0, parseFloat(draftTargets.protein_g) || 0),
+      carbs_g: Math.max(0, parseFloat(draftTargets.carbs_g) || 0),
+      fat_g: Math.max(0, parseFloat(draftTargets.fat_g) || 0),
+    };
+    setTargets(cleaned);
+    persistTargets(cleaned);
+    setEditingTargets(false);
+  }
+
+  function cancelTargetsEdit() {
+    setDraftTargets(targets);
+    setEditingTargets(false);
+  }
+
   function totalsFor(dateKey) {
     const entries = allEntries[dateKey] || [];
     return entries.reduce((acc, e) => ({
@@ -903,11 +1058,29 @@ function App() {
     return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   }
 
+  function gapInfo(current, target, unit) {
+    if (!target || target <= 0) return { text: '— no target —', over: false, percent: 0 };
+    const diff = target - current;
+    const percent = (current / target) * 100;
+    if (diff > 0) {
+      return { text: `${Math.round(diff)}${unit} to go`, over: false, percent };
+    } else if (Math.abs(diff) < 1) {
+      return { text: 'on target', over: false, percent: 100 };
+    } else {
+      return { text: `${Math.round(Math.abs(diff))}${unit} over`, over: true, percent };
+    }
+  }
+
   const totals = totalsFor(viewDate);
   const viewEntries = allEntries[viewDate] || [];
   const sortedDates = Object.keys(allEntries).sort((a, b) => b.localeCompare(a));
   if (!sortedDates.includes(todayKey())) sortedDates.unshift(todayKey());
   const isPast = viewDate !== todayKey();
+
+  const calGap = gapInfo(totals.calories, targets.calories, '');
+  const proGap = gapInfo(totals.protein_g, targets.protein_g, 'g');
+  const carGap = gapInfo(totals.carbs_g, targets.carbs_g, 'g');
+  const fatGap = gapInfo(totals.fat_g, targets.fat_g, 'g');
 
   const cal = analysis ? Math.round(analysis.calories * analysis.servings) : 0;
   const pro = analysis ? Math.round(analysis.protein_g * analysis.servings * 10) / 10 : 0;
@@ -938,24 +1111,111 @@ function App() {
         <div className="stat calories">
           <div className="stat-decoration">kcal</div>
           <div className="stat-label">Calories</div>
-          <div className="stat-value">{Math.round(totals.calories)}</div>
+          <div className="stat-value">
+            {Math.round(totals.calories)}
+            {targets.calories > 0 && <span className="of">/ {targets.calories}</span>}
+          </div>
+          <div className={`stat-gap ${calGap.over ? 'over' : ''}`}>
+            <span className="gap-num">{calGap.text}</span>
+          </div>
+          {targets.calories > 0 && (
+            <div className="progress-bar">
+              <div className={`progress-fill ${calGap.over ? 'over' : ''}`}
+                   style={{ width: `${Math.min(100, calGap.percent)}%` }}></div>
+            </div>
+          )}
         </div>
+
         <div className="stat">
           <div className="stat-decoration">P</div>
           <div className="stat-label">Protein</div>
-          <div className="stat-value">{Math.round(totals.protein_g)}<span className="unit">g</span></div>
+          <div className="stat-value">
+            {Math.round(totals.protein_g)}<span className="unit">g</span>
+            {targets.protein_g > 0 && <span className="of">/ {targets.protein_g}g</span>}
+          </div>
+          <div className={`stat-gap ${proGap.over ? 'over' : ''}`}>
+            <span className="gap-num">{proGap.text}</span>
+          </div>
+          {targets.protein_g > 0 && (
+            <div className="progress-bar">
+              <div className={`progress-fill ${proGap.over ? 'over' : ''}`}
+                   style={{ width: `${Math.min(100, proGap.percent)}%` }}></div>
+            </div>
+          )}
         </div>
+
         <div className="stat">
           <div className="stat-decoration">C</div>
           <div className="stat-label">Carbs</div>
-          <div className="stat-value">{Math.round(totals.carbs_g)}<span className="unit">g</span></div>
+          <div className="stat-value">
+            {Math.round(totals.carbs_g)}<span className="unit">g</span>
+            {targets.carbs_g > 0 && <span className="of">/ {targets.carbs_g}g</span>}
+          </div>
+          <div className={`stat-gap ${carGap.over ? 'over' : ''}`}>
+            <span className="gap-num">{carGap.text}</span>
+          </div>
+          {targets.carbs_g > 0 && (
+            <div className="progress-bar">
+              <div className={`progress-fill ${carGap.over ? 'over' : ''}`}
+                   style={{ width: `${Math.min(100, carGap.percent)}%` }}></div>
+            </div>
+          )}
         </div>
+
         <div className="stat">
           <div className="stat-decoration">F</div>
           <div className="stat-label">Fat</div>
-          <div className="stat-value">{Math.round(totals.fat_g)}<span className="unit">g</span></div>
+          <div className="stat-value">
+            {Math.round(totals.fat_g)}<span className="unit">g</span>
+            {targets.fat_g > 0 && <span className="of">/ {targets.fat_g}g</span>}
+          </div>
+          <div className={`stat-gap ${fatGap.over ? 'over' : ''}`}>
+            <span className="gap-num">{fatGap.text}</span>
+          </div>
+          {targets.fat_g > 0 && (
+            <div className="progress-bar">
+              <div className={`progress-fill ${fatGap.over ? 'over' : ''}`}
+                   style={{ width: `${Math.min(100, fatGap.percent)}%` }}></div>
+            </div>
+          )}
         </div>
       </div>
+
+      <div className="targets-row">
+        <button className="targets-toggle" onClick={() => setEditingTargets(t => !t)}>
+          <span className="arrow">{editingTargets ? '×' : '✎'}</span>
+          {editingTargets ? 'Close targets' : 'Edit daily targets'}
+        </button>
+      </div>
+
+      {editingTargets && (
+        <div className="targets-editor">
+          <div className="target-field">
+            <label>Calories</label>
+            <input type="number" inputMode="numeric" value={draftTargets.calories}
+              onChange={(e) => setDraftTargets(d => ({ ...d, calories: e.target.value }))} />
+          </div>
+          <div className="target-field">
+            <label>Protein (g)</label>
+            <input type="number" inputMode="numeric" value={draftTargets.protein_g}
+              onChange={(e) => setDraftTargets(d => ({ ...d, protein_g: e.target.value }))} />
+          </div>
+          <div className="target-field">
+            <label>Carbs (g)</label>
+            <input type="number" inputMode="numeric" value={draftTargets.carbs_g}
+              onChange={(e) => setDraftTargets(d => ({ ...d, carbs_g: e.target.value }))} />
+          </div>
+          <div className="target-field">
+            <label>Fat (g)</label>
+            <input type="number" inputMode="numeric" value={draftTargets.fat_g}
+              onChange={(e) => setDraftTargets(d => ({ ...d, fat_g: e.target.value }))} />
+          </div>
+          <div className="targets-save-row">
+            <button className="btn btn-small btn-ghost" onClick={cancelTargetsEdit}>Cancel</button>
+            <button className="btn btn-small btn-primary" onClick={saveTargets}>Save targets</button>
+          </div>
+        </div>
+      )}
 
       <div className="upload-section">
         <div className="section-title">

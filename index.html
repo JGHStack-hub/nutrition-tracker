@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.21.4/babel.min.js"></script>
 
 <style>
   :root {
@@ -298,7 +298,7 @@
     padding-top: 4px;
   }
 
-  .upload-section { margin-bottom: 48px; }
+  .section { margin-bottom: 48px; }
 
   .section-title {
     font-family: 'Fraunces', serif;
@@ -326,6 +326,128 @@
     margin-left: auto;
   }
 
+  /* Favorites */
+  .favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+
+  .favorite {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 100px;
+  }
+
+  .favorite:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    transform: translateY(-1px);
+  }
+
+  .favorite-name {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.2;
+    padding-right: 50px; /* room for icons */
+  }
+
+  .favorite-serving {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-top: -2px;
+  }
+
+  .favorite-macros {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 6px;
+    border-top: 1px solid var(--line);
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    color: var(--ink);
+  }
+
+  .favorite-macros span {
+    display: block;
+    font-size: 8px;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 1px;
+    font-weight: 400;
+  }
+
+  .favorite-count {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    color: var(--gold);
+    background: var(--gold-soft);
+    padding: 2px 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+  }
+
+  .favorite-actions {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .favorite:hover .favorite-actions { opacity: 1; }
+  @media (max-width: 700px) {
+    .favorite-actions { opacity: 0.6; }
+  }
+
+  .favorite-action-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: var(--paper);
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    line-height: 1;
+    border-radius: 2px;
+  }
+
+  .favorite-action-btn:hover { color: var(--accent); background: var(--paper); }
+
+  .favorites-empty {
+    background: var(--paper);
+    border: 1px dashed var(--line);
+    padding: 24px;
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  /* Upload */
   .upload-zone {
     background: var(--paper);
     border: 2px dashed var(--ink);
@@ -520,7 +642,7 @@
     outline: none;
   }
 
-  .action-buttons { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+  .action-buttons { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; align-items: center; }
 
   .btn {
     padding: 12px 22px;
@@ -545,10 +667,16 @@
   .btn-primary:hover { background: var(--ink); border-color: var(--ink); }
 
   .btn-ghost { border-color: var(--muted); color: var(--muted); }
-
   .btn-small { padding: 8px 14px; font-size: 10px; }
 
-  .entries-section { margin-bottom: 48px; }
+  .btn-fav {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: var(--paper);
+  }
+
+  .btn-fav:hover { background: var(--gold); color: var(--paper); border-color: var(--gold); }
+  .btn-fav.saved { background: var(--gold-soft); border-color: var(--gold); color: var(--gold); }
 
   .entries-list { display: flex; flex-direction: column; gap: 0; }
 
@@ -677,8 +805,6 @@
     font-size: 16px;
   }
 
-  .history-section { margin-bottom: 24px; }
-
   .history-tabs {
     display: flex;
     gap: 0;
@@ -705,9 +831,7 @@
   }
 
   .history-tab:hover { color: var(--ink); }
-
   .history-tab.active { color: var(--ink); border-bottom-color: var(--accent); }
-
   .history-tab .cal { color: var(--accent); margin-left: 6px; font-weight: 500; }
 
   .error {
@@ -751,6 +875,7 @@ const { useState, useEffect, useRef } = React;
 
 const STORAGE_KEY = 'nutrition_entries_v1';
 const TARGETS_KEY = 'nutrition_targets_v1';
+const FAVORITES_KEY = 'nutrition_favorites_v1';
 const MAX_IMAGE_DIMENSION = 1024;
 const JPEG_QUALITY = 0.75;
 
@@ -766,6 +891,7 @@ function App() {
   const [targets, setTargets] = useState(DEFAULT_TARGETS);
   const [editingTargets, setEditingTargets] = useState(false);
   const [draftTargets, setDraftTargets] = useState(DEFAULT_TARGETS);
+  const [favorites, setFavorites] = useState([]);
   const [viewDate, setViewDate] = useState(todayKey());
   const [analysis, setAnalysis] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -774,6 +900,9 @@ function App() {
   const [dragging, setDragging] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editDraft, setEditDraft] = useState(null);
+  const [editingFavId, setEditingFavId] = useState(null);
+  const [editFavDraft, setEditFavDraft] = useState(null);
+  const [savedFavThisRound, setSavedFavThisRound] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -789,15 +918,22 @@ function App() {
         setDraftTargets(parsed);
       }
     } catch (e) {}
+    try {
+      const f = localStorage.getItem(FAVORITES_KEY);
+      if (f) setFavorites(JSON.parse(f));
+    } catch (e) {}
   }, []);
 
   function persistEntries(next) {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); }
     catch (e) { console.error('Storage failed:', e); }
   }
-
   function persistTargets(next) {
     try { localStorage.setItem(TARGETS_KEY, JSON.stringify(next)); }
+    catch (e) { console.error('Storage failed:', e); }
+  }
+  function persistFavorites(next) {
+    try { localStorage.setItem(FAVORITES_KEY, JSON.stringify(next)); }
     catch (e) { console.error('Storage failed:', e); }
   }
 
@@ -866,6 +1002,7 @@ function App() {
       return;
     }
     setError('');
+    setSavedFavThisRound(false);
     try {
       const { dataUrl, base64, mediaType } = await resizeImage(file);
       setImagePreview(dataUrl);
@@ -890,11 +1027,8 @@ function App() {
 
       const responseText = await response.text();
       let parsed;
-      try {
-        parsed = JSON.parse(responseText);
-      } catch (e) {
-        throw new Error(`Server returned non-JSON: ${responseText.slice(0, 100)}`);
-      }
+      try { parsed = JSON.parse(responseText); }
+      catch (e) { throw new Error(`Server returned non-JSON: ${responseText.slice(0, 100)}`); }
 
       if (!response.ok) {
         const detail = parsed.detail ? ` (${parsed.detail.slice(0, 100)})` : '';
@@ -918,6 +1052,7 @@ function App() {
         confidence: parsed.confidence || 'medium',
         notes: parsed.notes || '',
         servings: 1,
+        favoriteId: null,
       });
     } catch (e) {
       console.error(e);
@@ -939,13 +1074,38 @@ function App() {
       confidence: 'low',
       notes: 'Manually entered',
       servings: 1,
+      favoriteId: null,
     };
   }
 
   function startManualEntry() {
     setImagePreview(null);
     setError('');
+    setSavedFavThisRound(false);
     setAnalysis(blankAnalysis());
+  }
+
+  function loadFromFavorite(fav) {
+    setImagePreview(null);
+    setError('');
+    setSavedFavThisRound(false);
+    setAnalysis({
+      name: fav.name,
+      serving_description: fav.serving_description,
+      calories: fav.calories,
+      protein_g: fav.protein_g,
+      carbs_g: fav.carbs_g,
+      fat_g: fav.fat_g,
+      confidence: 'high',
+      notes: 'from favorites',
+      servings: fav.last_servings || 1,
+      favoriteId: fav.id,
+    });
+    // Scroll to the entry area
+    setTimeout(() => {
+      const el = document.querySelector('.upload-section');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
   }
 
   function updateAnalysisField(field, value) {
@@ -981,7 +1141,89 @@ function App() {
     const next = { ...allEntries, [viewDate]: [...(allEntries[viewDate] || []), entry] };
     setAllEntries(next);
     persistEntries(next);
+
+    // If this came from a favorite, bump its use count and update last_servings
+    if (analysis.favoriteId) {
+      const updatedFavs = favorites.map(f =>
+        f.id === analysis.favoriteId
+          ? { ...f, use_count: (f.use_count || 0) + 1, last_servings: analysis.servings }
+          : f
+      );
+      setFavorites(updatedFavs);
+      persistFavorites(updatedFavs);
+    }
+
     resetForm();
+  }
+
+  function saveAsFavorite() {
+    if (!analysis) return;
+    // Avoid exact duplicates by name
+    const dupe = favorites.find(f => f.name.trim().toLowerCase() === analysis.name.trim().toLowerCase());
+    if (dupe) {
+      // Update the existing one rather than create a duplicate
+      const updated = favorites.map(f =>
+        f.id === dupe.id
+          ? { ...f,
+              serving_description: analysis.serving_description,
+              calories: analysis.calories,
+              protein_g: analysis.protein_g,
+              carbs_g: analysis.carbs_g,
+              fat_g: analysis.fat_g,
+              last_servings: analysis.servings,
+            }
+          : f
+      );
+      setFavorites(updated);
+      persistFavorites(updated);
+      // Link current analysis to this favorite so logging bumps count
+      setAnalysis(a => ({ ...a, favoriteId: dupe.id }));
+    } else {
+      const newFav = {
+        id: Date.now(),
+        name: analysis.name,
+        serving_description: analysis.serving_description,
+        calories: analysis.calories,
+        protein_g: analysis.protein_g,
+        carbs_g: analysis.carbs_g,
+        fat_g: analysis.fat_g,
+        last_servings: analysis.servings,
+        use_count: 0,
+        created_at: new Date().toISOString(),
+      };
+      const next = [...favorites, newFav];
+      setFavorites(next);
+      persistFavorites(next);
+      setAnalysis(a => ({ ...a, favoriteId: newFav.id }));
+    }
+    setSavedFavThisRound(true);
+  }
+
+  function deleteFavorite(id) {
+    const next = favorites.filter(f => f.id !== id);
+    setFavorites(next);
+    persistFavorites(next);
+  }
+
+  function startEditFav(fav) {
+    setEditingFavId(fav.id);
+    setEditFavDraft({ ...fav });
+  }
+
+  function cancelEditFav() {
+    setEditingFavId(null);
+    setEditFavDraft(null);
+  }
+
+  function saveEditFav() {
+    const next = favorites.map(f => f.id === editingFavId ? { ...editFavDraft } : f);
+    setFavorites(next);
+    persistFavorites(next);
+    cancelEditFav();
+  }
+
+  function updateEditFavField(field, value) {
+    setEditFavDraft(d => ({ ...d, [field]: value }));
   }
 
   function deleteEntry(dateKey, id) {
@@ -1024,6 +1266,7 @@ function App() {
     setAnalysis(null);
     setImagePreview(null);
     setError('');
+    setSavedFavThisRound(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
@@ -1062,13 +1305,9 @@ function App() {
     if (!target || target <= 0) return { text: '— no target —', over: false, percent: 0 };
     const diff = target - current;
     const percent = (current / target) * 100;
-    if (diff > 0) {
-      return { text: `${Math.round(diff)}${unit} to go`, over: false, percent };
-    } else if (Math.abs(diff) < 1) {
-      return { text: 'on target', over: false, percent: 100 };
-    } else {
-      return { text: `${Math.round(Math.abs(diff))}${unit} over`, over: true, percent };
-    }
+    if (diff > 0) return { text: `${Math.round(diff)}${unit} to go`, over: false, percent };
+    if (Math.abs(diff) < 1) return { text: 'on target', over: false, percent: 100 };
+    return { text: `${Math.round(Math.abs(diff))}${unit} over`, over: true, percent };
   }
 
   const totals = totalsFor(viewDate);
@@ -1076,6 +1315,13 @@ function App() {
   const sortedDates = Object.keys(allEntries).sort((a, b) => b.localeCompare(a));
   if (!sortedDates.includes(todayKey())) sortedDates.unshift(todayKey());
   const isPast = viewDate !== todayKey();
+
+  // Favorites sorted by use_count desc, then newest first
+  const sortedFavorites = [...favorites].sort((a, b) => {
+    const useDiff = (b.use_count || 0) - (a.use_count || 0);
+    if (useDiff !== 0) return useDiff;
+    return (b.created_at || '').localeCompare(a.created_at || '');
+  });
 
   const calGap = gapInfo(totals.calories, targets.calories, '');
   const proGap = gapInfo(totals.protein_g, targets.protein_g, 'g');
@@ -1111,73 +1357,30 @@ function App() {
         <div className="stat calories">
           <div className="stat-decoration">kcal</div>
           <div className="stat-label">Calories</div>
-          <div className="stat-value">
-            {Math.round(totals.calories)}
-            {targets.calories > 0 && <span className="of">/ {targets.calories}</span>}
-          </div>
-          <div className={`stat-gap ${calGap.over ? 'over' : ''}`}>
-            <span className="gap-num">{calGap.text}</span>
-          </div>
-          {targets.calories > 0 && (
-            <div className="progress-bar">
-              <div className={`progress-fill ${calGap.over ? 'over' : ''}`}
-                   style={{ width: `${Math.min(100, calGap.percent)}%` }}></div>
-            </div>
-          )}
+          <div className="stat-value">{Math.round(totals.calories)}{targets.calories > 0 && <span className="of">/ {targets.calories}</span>}</div>
+          <div className={`stat-gap ${calGap.over ? 'over' : ''}`}><span className="gap-num">{calGap.text}</span></div>
+          {targets.calories > 0 && <div className="progress-bar"><div className={`progress-fill ${calGap.over ? 'over' : ''}`} style={{ width: `${Math.min(100, calGap.percent)}%` }}></div></div>}
         </div>
-
         <div className="stat">
           <div className="stat-decoration">P</div>
           <div className="stat-label">Protein</div>
-          <div className="stat-value">
-            {Math.round(totals.protein_g)}<span className="unit">g</span>
-            {targets.protein_g > 0 && <span className="of">/ {targets.protein_g}g</span>}
-          </div>
-          <div className={`stat-gap ${proGap.over ? 'over' : ''}`}>
-            <span className="gap-num">{proGap.text}</span>
-          </div>
-          {targets.protein_g > 0 && (
-            <div className="progress-bar">
-              <div className={`progress-fill ${proGap.over ? 'over' : ''}`}
-                   style={{ width: `${Math.min(100, proGap.percent)}%` }}></div>
-            </div>
-          )}
+          <div className="stat-value">{Math.round(totals.protein_g)}<span className="unit">g</span>{targets.protein_g > 0 && <span className="of">/ {targets.protein_g}g</span>}</div>
+          <div className={`stat-gap ${proGap.over ? 'over' : ''}`}><span className="gap-num">{proGap.text}</span></div>
+          {targets.protein_g > 0 && <div className="progress-bar"><div className={`progress-fill ${proGap.over ? 'over' : ''}`} style={{ width: `${Math.min(100, proGap.percent)}%` }}></div></div>}
         </div>
-
         <div className="stat">
           <div className="stat-decoration">C</div>
           <div className="stat-label">Carbs</div>
-          <div className="stat-value">
-            {Math.round(totals.carbs_g)}<span className="unit">g</span>
-            {targets.carbs_g > 0 && <span className="of">/ {targets.carbs_g}g</span>}
-          </div>
-          <div className={`stat-gap ${carGap.over ? 'over' : ''}`}>
-            <span className="gap-num">{carGap.text}</span>
-          </div>
-          {targets.carbs_g > 0 && (
-            <div className="progress-bar">
-              <div className={`progress-fill ${carGap.over ? 'over' : ''}`}
-                   style={{ width: `${Math.min(100, carGap.percent)}%` }}></div>
-            </div>
-          )}
+          <div className="stat-value">{Math.round(totals.carbs_g)}<span className="unit">g</span>{targets.carbs_g > 0 && <span className="of">/ {targets.carbs_g}g</span>}</div>
+          <div className={`stat-gap ${carGap.over ? 'over' : ''}`}><span className="gap-num">{carGap.text}</span></div>
+          {targets.carbs_g > 0 && <div className="progress-bar"><div className={`progress-fill ${carGap.over ? 'over' : ''}`} style={{ width: `${Math.min(100, carGap.percent)}%` }}></div></div>}
         </div>
-
         <div className="stat">
           <div className="stat-decoration">F</div>
           <div className="stat-label">Fat</div>
-          <div className="stat-value">
-            {Math.round(totals.fat_g)}<span className="unit">g</span>
-            {targets.fat_g > 0 && <span className="of">/ {targets.fat_g}g</span>}
-          </div>
-          <div className={`stat-gap ${fatGap.over ? 'over' : ''}`}>
-            <span className="gap-num">{fatGap.text}</span>
-          </div>
-          {targets.fat_g > 0 && (
-            <div className="progress-bar">
-              <div className={`progress-fill ${fatGap.over ? 'over' : ''}`}
-                   style={{ width: `${Math.min(100, fatGap.percent)}%` }}></div>
-            </div>
-          )}
+          <div className="stat-value">{Math.round(totals.fat_g)}<span className="unit">g</span>{targets.fat_g > 0 && <span className="of">/ {targets.fat_g}g</span>}</div>
+          <div className={`stat-gap ${fatGap.over ? 'over' : ''}`}><span className="gap-num">{fatGap.text}</span></div>
+          {targets.fat_g > 0 && <div className="progress-bar"><div className={`progress-fill ${fatGap.over ? 'over' : ''}`} style={{ width: `${Math.min(100, fatGap.percent)}%` }}></div></div>}
         </div>
       </div>
 
@@ -1190,26 +1393,10 @@ function App() {
 
       {editingTargets && (
         <div className="targets-editor">
-          <div className="target-field">
-            <label>Calories</label>
-            <input type="number" inputMode="numeric" value={draftTargets.calories}
-              onChange={(e) => setDraftTargets(d => ({ ...d, calories: e.target.value }))} />
-          </div>
-          <div className="target-field">
-            <label>Protein (g)</label>
-            <input type="number" inputMode="numeric" value={draftTargets.protein_g}
-              onChange={(e) => setDraftTargets(d => ({ ...d, protein_g: e.target.value }))} />
-          </div>
-          <div className="target-field">
-            <label>Carbs (g)</label>
-            <input type="number" inputMode="numeric" value={draftTargets.carbs_g}
-              onChange={(e) => setDraftTargets(d => ({ ...d, carbs_g: e.target.value }))} />
-          </div>
-          <div className="target-field">
-            <label>Fat (g)</label>
-            <input type="number" inputMode="numeric" value={draftTargets.fat_g}
-              onChange={(e) => setDraftTargets(d => ({ ...d, fat_g: e.target.value }))} />
-          </div>
+          <div className="target-field"><label>Calories</label><input type="number" inputMode="numeric" value={draftTargets.calories} onChange={(e) => setDraftTargets(d => ({ ...d, calories: e.target.value }))} /></div>
+          <div className="target-field"><label>Protein (g)</label><input type="number" inputMode="numeric" value={draftTargets.protein_g} onChange={(e) => setDraftTargets(d => ({ ...d, protein_g: e.target.value }))} /></div>
+          <div className="target-field"><label>Carbs (g)</label><input type="number" inputMode="numeric" value={draftTargets.carbs_g} onChange={(e) => setDraftTargets(d => ({ ...d, carbs_g: e.target.value }))} /></div>
+          <div className="target-field"><label>Fat (g)</label><input type="number" inputMode="numeric" value={draftTargets.fat_g} onChange={(e) => setDraftTargets(d => ({ ...d, fat_g: e.target.value }))} /></div>
           <div className="targets-save-row">
             <button className="btn btn-small btn-ghost" onClick={cancelTargetsEdit}>Cancel</button>
             <button className="btn btn-small btn-primary" onClick={saveTargets}>Save targets</button>
@@ -1217,33 +1404,79 @@ function App() {
         </div>
       )}
 
-      <div className="upload-section">
+      {/* Favorites */}
+      <div className="section">
+        <div className="section-title">
+          Favorites
+          <span className="num">00 / regulars</span>
+        </div>
+        {sortedFavorites.length === 0 ? (
+          <div className="favorites-empty">
+            — no favorites yet — save items you eat often using the ☆ button after analyzing —
+          </div>
+        ) : (
+          <div className="favorites-grid">
+            {sortedFavorites.map(fav => editingFavId === fav.id ? (
+              <div key={fav.id} className="favorite" style={{ cursor: 'default', background: 'var(--moss-soft)', borderColor: 'var(--moss)' }}>
+                <input type="text" value={editFavDraft.name} onChange={(e) => updateEditFavField('name', e.target.value)}
+                  style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--paper)', padding: '6px 8px', fontFamily: 'Fraunces, serif', fontSize: '14px', fontWeight: 600, color: 'var(--ink)', outline: 'none' }} />
+                <input type="text" value={editFavDraft.serving_description} onChange={(e) => updateEditFavField('serving_description', e.target.value)}
+                  style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--paper)', padding: '4px 8px', fontFamily: 'DM Mono, monospace', fontSize: '10px', color: 'var(--muted)', outline: 'none' }} />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4 }}>
+                  <input type="number" inputMode="decimal" value={editFavDraft.calories} onChange={(e) => updateEditFavField('calories', parseFloat(e.target.value) || 0)} title="Cal"
+                    style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--paper)', padding: '4px 6px', fontFamily: 'Fraunces, serif', fontSize: '12px', fontWeight: 600, color: 'var(--ink)', outline: 'none' }} />
+                  <input type="number" inputMode="decimal" step="0.1" value={editFavDraft.protein_g} onChange={(e) => updateEditFavField('protein_g', parseFloat(e.target.value) || 0)} title="Pro"
+                    style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--paper)', padding: '4px 6px', fontFamily: 'Fraunces, serif', fontSize: '12px', fontWeight: 600, color: 'var(--ink)', outline: 'none' }} />
+                  <input type="number" inputMode="decimal" step="0.1" value={editFavDraft.carbs_g} onChange={(e) => updateEditFavField('carbs_g', parseFloat(e.target.value) || 0)} title="Carb"
+                    style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--paper)', padding: '4px 6px', fontFamily: 'Fraunces, serif', fontSize: '12px', fontWeight: 600, color: 'var(--ink)', outline: 'none' }} />
+                  <input type="number" inputMode="decimal" step="0.1" value={editFavDraft.fat_g} onChange={(e) => updateEditFavField('fat_g', parseFloat(e.target.value) || 0)} title="Fat"
+                    style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--paper)', padding: '4px 6px', fontFamily: 'Fraunces, serif', fontSize: '12px', fontWeight: 600, color: 'var(--ink)', outline: 'none' }} />
+                </div>
+                <div style={{ display: 'flex', gap: 6, marginTop: 'auto' }}>
+                  <button className="btn btn-small btn-primary" onClick={saveEditFav}>Save</button>
+                  <button className="btn btn-small btn-ghost" onClick={cancelEditFav}>Cancel</button>
+                </div>
+              </div>
+            ) : (
+              <button key={fav.id} className="favorite" onClick={() => loadFromFavorite(fav)}>
+                {fav.use_count > 0 && <div className="favorite-count">×{fav.use_count}</div>}
+                <div>
+                  <div className="favorite-name">{fav.name}</div>
+                  <div className="favorite-serving">per {fav.serving_description}</div>
+                </div>
+                <div className="favorite-macros">
+                  <div>{Math.round(fav.calories)}<span>kcal</span></div>
+                  <div>{Math.round(fav.protein_g)}<span>pro</span></div>
+                  <div>{Math.round(fav.carbs_g)}<span>carb</span></div>
+                  <div>{Math.round(fav.fat_g)}<span>fat</span></div>
+                </div>
+                <div className="favorite-actions" onClick={(e) => e.stopPropagation()}>
+                  <button className="favorite-action-btn" onClick={(e) => { e.stopPropagation(); startEditFav(fav); }} title="Edit">✎</button>
+                  <button className="favorite-action-btn" onClick={(e) => { e.stopPropagation(); if (confirm(`Delete "${fav.name}" from favorites?`)) deleteFavorite(fav.id); }} title="Delete">✕</button>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Upload / Entry */}
+      <div className="section upload-section">
         <div className="section-title">
           {isPast ? `Add to ${formatDateLabel(viewDate)}` : 'Add an entry'}
           <span className="num">01 / capture</span>
         </div>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden-input"
-          onChange={(e) => e.target.files[0] && handleFile(e.target.files[0])}
-        />
+        <input ref={fileInputRef} type="file" accept="image/*" className="hidden-input"
+          onChange={(e) => e.target.files[0] && handleFile(e.target.files[0])} />
 
         {!imagePreview && !analysis ? (
           <>
-            <div
-              className={`upload-zone ${dragging ? 'dragging' : ''}`}
+            <div className={`upload-zone ${dragging ? 'dragging' : ''}`}
               onClick={() => fileInputRef.current?.click()}
               onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
               onDragLeave={() => setDragging(false)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setDragging(false);
-                if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
-              }}
-            >
+              onDrop={(e) => { e.preventDefault(); setDragging(false); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); }}>
               <div className="upload-icon">+</div>
               <div className="upload-text">Tap to upload or take a photo</div>
               <div className="upload-hint">Food photo or nutrition label</div>
@@ -1258,53 +1491,30 @@ function App() {
               {imagePreview ? (
                 <img src={imagePreview} className="preview-image" alt="upload preview" />
               ) : (
-                <div className="preview-image" style={{ background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Fraunces, serif', fontStyle: 'italic', color: 'var(--muted)', fontSize: '14px' }}>manual entry</div>
+                <div className="preview-image" style={{ background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Fraunces, serif', fontStyle: 'italic', color: 'var(--muted)', fontSize: '14px' }}>
+                  {analysis && analysis.favoriteId ? 'from favorites' : 'manual entry'}
+                </div>
               )}
               <div className="analysis-area">
-                {analyzing && (
-                  <div className="loading">
-                    <div className="spinner"></div>
-                    Reading the label, doing the arithmetic…
-                  </div>
-                )}
-
+                {analyzing && (<div className="loading"><div className="spinner"></div>Reading the label, doing the arithmetic…</div>)}
                 {error && <div className="error">{error}</div>}
-
                 {analysis && (
                   <>
                     <div className="detected">
-                      <input
-                        style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none', fontFamily: 'Fraunces, serif', fontSize: '18px', fontWeight: 600, color: 'var(--ink)' }}
-                        value={analysis.name}
-                        onChange={(e) => updateAnalysisField('name', e.target.value)}
-                      />
+                      <input style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none', fontFamily: 'Fraunces, serif', fontSize: '18px', fontWeight: 600, color: 'var(--ink)' }}
+                        value={analysis.name} onChange={(e) => updateAnalysisField('name', e.target.value)} />
                       <div className="detected-serving">
-                        per <input
-                          style={{ border: 'none', background: 'transparent', outline: 'none', fontFamily: 'DM Mono, monospace', fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', width: '60%' }}
-                          value={analysis.serving_description}
-                          onChange={(e) => updateAnalysisField('serving_description', e.target.value)}
-                        />
+                        per <input style={{ border: 'none', background: 'transparent', outline: 'none', fontFamily: 'DM Mono, monospace', fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em', width: '60%' }}
+                          value={analysis.serving_description} onChange={(e) => updateAnalysisField('serving_description', e.target.value)} />
                         {analysis.notes && <div style={{ marginTop: 4, fontStyle: 'italic' }}>· {analysis.notes}</div>}
                       </div>
                     </div>
 
                     <div className="macros-grid">
-                      <div className="macro-input">
-                        <label>Cal</label>
-                        <input type="number" inputMode="decimal" value={analysis.calories} onChange={(e) => updateAnalysisField('calories', parseFloat(e.target.value) || 0)} />
-                      </div>
-                      <div className="macro-input">
-                        <label>Pro (g)</label>
-                        <input type="number" inputMode="decimal" step="0.1" value={analysis.protein_g} onChange={(e) => updateAnalysisField('protein_g', parseFloat(e.target.value) || 0)} />
-                      </div>
-                      <div className="macro-input">
-                        <label>Carb (g)</label>
-                        <input type="number" inputMode="decimal" step="0.1" value={analysis.carbs_g} onChange={(e) => updateAnalysisField('carbs_g', parseFloat(e.target.value) || 0)} />
-                      </div>
-                      <div className="macro-input">
-                        <label>Fat (g)</label>
-                        <input type="number" inputMode="decimal" step="0.1" value={analysis.fat_g} onChange={(e) => updateAnalysisField('fat_g', parseFloat(e.target.value) || 0)} />
-                      </div>
+                      <div className="macro-input"><label>Cal</label><input type="number" inputMode="decimal" value={analysis.calories} onChange={(e) => updateAnalysisField('calories', parseFloat(e.target.value) || 0)} /></div>
+                      <div className="macro-input"><label>Pro (g)</label><input type="number" inputMode="decimal" step="0.1" value={analysis.protein_g} onChange={(e) => updateAnalysisField('protein_g', parseFloat(e.target.value) || 0)} /></div>
+                      <div className="macro-input"><label>Carb (g)</label><input type="number" inputMode="decimal" step="0.1" value={analysis.carbs_g} onChange={(e) => updateAnalysisField('carbs_g', parseFloat(e.target.value) || 0)} /></div>
+                      <div className="macro-input"><label>Fat (g)</label><input type="number" inputMode="decimal" step="0.1" value={analysis.fat_g} onChange={(e) => updateAnalysisField('fat_g', parseFloat(e.target.value) || 0)} /></div>
                     </div>
 
                     <div className="servings-row">
@@ -1325,6 +1535,9 @@ function App() {
 
                     <div className="action-buttons">
                       <button className="btn btn-primary" onClick={logEntry}>Log it</button>
+                      <button className={`btn btn-fav ${savedFavThisRound ? 'saved' : ''}`} onClick={saveAsFavorite}>
+                        {savedFavThisRound ? '★ Saved' : '☆ Save as favorite'}
+                      </button>
                       <button className="btn btn-ghost" onClick={resetForm}>Discard</button>
                     </div>
                   </>
@@ -1335,7 +1548,8 @@ function App() {
         )}
       </div>
 
-      <div className="entries-section">
+      {/* Ledger */}
+      <div className="section">
         <div className="section-title">
           {viewDate === todayKey() ? "Today's ledger" : `Ledger · ${formatDateLabel(viewDate)}`}
           <span className="num">02 / record</span>
@@ -1349,23 +1563,13 @@ function App() {
               <React.Fragment key={entry.id}>
                 {editingId === entry.id ? (
                   <div className="entry-editor">
+                    <div className="editor-row"><label>Name</label><input type="text" value={editDraft.name} onChange={(e) => updateEditField('name', e.target.value)} /></div>
+                    <div className="editor-row"><label>Serving</label><input type="text" value={editDraft.serving_description} onChange={(e) => updateEditField('serving_description', e.target.value)} /></div>
                     <div className="editor-row">
-                      <label>Name</label>
-                      <input type="text" value={editDraft.name} onChange={(e) => updateEditField('name', e.target.value)} />
-                    </div>
-                    <div className="editor-row">
-                      <label>Serving</label>
-                      <input type="text" value={editDraft.serving_description} onChange={(e) => updateEditField('serving_description', e.target.value)} />
-                    </div>
-                    <div className="editor-row">
-                      <label>Cal</label>
-                      <input type="number" inputMode="decimal" value={editDraft.calories} onChange={(e) => updateEditField('calories', parseFloat(e.target.value) || 0)} />
-                      <label>Pro</label>
-                      <input type="number" inputMode="decimal" step="0.1" value={editDraft.protein_g} onChange={(e) => updateEditField('protein_g', parseFloat(e.target.value) || 0)} />
-                      <label>Carb</label>
-                      <input type="number" inputMode="decimal" step="0.1" value={editDraft.carbs_g} onChange={(e) => updateEditField('carbs_g', parseFloat(e.target.value) || 0)} />
-                      <label>Fat</label>
-                      <input type="number" inputMode="decimal" step="0.1" value={editDraft.fat_g} onChange={(e) => updateEditField('fat_g', parseFloat(e.target.value) || 0)} />
+                      <label>Cal</label><input type="number" inputMode="decimal" value={editDraft.calories} onChange={(e) => updateEditField('calories', parseFloat(e.target.value) || 0)} />
+                      <label>Pro</label><input type="number" inputMode="decimal" step="0.1" value={editDraft.protein_g} onChange={(e) => updateEditField('protein_g', parseFloat(e.target.value) || 0)} />
+                      <label>Carb</label><input type="number" inputMode="decimal" step="0.1" value={editDraft.carbs_g} onChange={(e) => updateEditField('carbs_g', parseFloat(e.target.value) || 0)} />
+                      <label>Fat</label><input type="number" inputMode="decimal" step="0.1" value={editDraft.fat_g} onChange={(e) => updateEditField('fat_g', parseFloat(e.target.value) || 0)} />
                     </div>
                     <div className="editor-row">
                       <label>Servings</label>
@@ -1381,10 +1585,7 @@ function App() {
                     <div className="entry-time">{formatTime(entry.time)}</div>
                     <div className="entry-info">
                       <div className="entry-name">{entry.name}</div>
-                      <div className="entry-detail">
-                        <span className="servings-badge">×{entry.servings}</span>
-                        {entry.serving_description}
-                      </div>
+                      <div className="entry-detail"><span className="servings-badge">×{entry.servings}</span>{entry.serving_description}</div>
                     </div>
                     <div className="entry-macros">
                       <div className="entry-macro">{Math.round(entry.calories * entry.servings)}<span>kcal</span></div>
@@ -1403,18 +1604,14 @@ function App() {
       </div>
 
       {sortedDates.length > 1 && (
-        <div className="history-section">
-          <div className="section-title">
-            History
-            <span className="num">03 / archive</span>
-          </div>
+        <div className="section">
+          <div className="section-title">History<span className="num">03 / archive</span></div>
           <div className="history-tabs">
             {sortedDates.map(key => {
               const t = totalsFor(key);
               return (
                 <button key={key} className={`history-tab ${viewDate === key ? 'active' : ''}`} onClick={() => { setViewDate(key); cancelEdit(); resetForm(); }}>
-                  {formatDateLabel(key)}
-                  <span className="cal">{Math.round(t.calories)}</span>
+                  {formatDateLabel(key)}<span className="cal">{Math.round(t.calories)}</span>
                 </button>
               );
             })}
@@ -1422,9 +1619,7 @@ function App() {
         </div>
       )}
 
-      <div className="footnote">
-        Kept honestly <span className="ornament">·</span> Updated as you eat
-      </div>
+      <div className="footnote">Kept honestly <span className="ornament">·</span> Updated as you eat</div>
     </div>
   );
 }

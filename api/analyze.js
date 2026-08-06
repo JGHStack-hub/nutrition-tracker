@@ -65,6 +65,7 @@ Respond with ONLY a JSON object, no markdown fences, no explanation before or af
   "protein_g": <number>,
   "carbs_g": <number>,
   "fat_g": <number>,
+  "saturated_fat_g": <number>,
   "confidence": "high" | "medium" | "low",
   "notes": "short note: 'read from label' or 'estimated from photo' or specific caveat"
 }

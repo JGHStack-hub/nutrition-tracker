@@ -204,6 +204,42 @@
   .stat-gap.over { color: var(--accent); opacity: 1; }
   .stat.calories .stat-gap.over { color: #ff8a5e; }
 
+  /* Sat fat sub-line under Fat tile */
+  .sat-sub {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dotted var(--line);
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .sat-sub .sat-label {
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 9px;
+  }
+
+  .sat-sub .sat-value {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--ink);
+  }
+
+  .sat-sub .sat-value.over { color: var(--accent); }
+
+  .sat-sub .sat-of {
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 400;
+  }
+
   .progress-bar {
     margin-top: 12px;
     height: 3px;
@@ -224,6 +260,24 @@
   .stat.calories .progress-fill { background: var(--accent); }
   .progress-fill.over { background: var(--accent); }
   .stat.calories .progress-fill.over { background: #ff8a5e; }
+
+  /* Thin sat fat progress bar under sub-line */
+  .sat-progress {
+    margin-top: 6px;
+    height: 2px;
+    background: rgba(0,0,0,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sat-progress .fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: var(--gold);
+    transition: width 0.4s ease;
+  }
+
+  .sat-progress .fill.over { background: var(--accent); }
 
   .targets-row {
     display: flex;
@@ -259,7 +313,7 @@
     padding: 18px 20px;
     margin-bottom: 32px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 12px;
   }
 
@@ -359,7 +413,7 @@
     font-weight: 600;
     color: var(--ink);
     line-height: 1.2;
-    padding-right: 50px; /* room for icons */
+    padding-right: 50px;
   }
 
   .favorite-serving {
@@ -372,6 +426,7 @@
 
   .favorite-macros {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
     margin-top: auto;
     padding-top: 6px;
@@ -381,7 +436,7 @@
     color: var(--ink);
   }
 
-  .favorite-macros span {
+  .favorite-macros > div span {
     display: block;
     font-size: 8px;
     font-family: 'DM Mono', monospace;
@@ -447,7 +502,6 @@
     font-size: 14px;
   }
 
-  /* Upload */
   .upload-zone {
     background: var(--paper);
     border: 2px dashed var(--ink);
@@ -566,9 +620,13 @@
 
   .macros-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 8px;
     padding: 12px 0;
+  }
+
+  @media (max-width: 600px) {
+    .macros-grid { grid-template-columns: repeat(3, 1fr); }
   }
 
   .macro-input {
@@ -884,6 +942,7 @@ const DEFAULT_TARGETS = {
   protein_g: 185,
   carbs_g: 100,
   fat_g: 65,
+  saturated_fat_g: 20,
 };
 
 function App() {
@@ -914,13 +973,20 @@ function App() {
       const t = localStorage.getItem(TARGETS_KEY);
       if (t) {
         const parsed = JSON.parse(t);
+        // Backfill sat fat target if missing from older saves
+        if (parsed.saturated_fat_g === undefined) parsed.saturated_fat_g = 20;
         setTargets(parsed);
         setDraftTargets(parsed);
       }
     } catch (e) {}
     try {
       const f = localStorage.getItem(FAVORITES_KEY);
-      if (f) setFavorites(JSON.parse(f));
+      if (f) {
+        const parsed = JSON.parse(f);
+        // Backfill sat fat on old favorites so app doesn't crash
+        parsed.forEach(fav => { if (fav.saturated_fat_g === undefined) fav.saturated_fat_g = 0; });
+        setFavorites(parsed);
+      }
     } catch (e) {}
   }, []);
 
@@ -972,17 +1038,11 @@ function App() {
           let { width, height } = img;
           const max = MAX_IMAGE_DIMENSION;
           if (width > max || height > max) {
-            if (width > height) {
-              height = Math.round(height * (max / width));
-              width = max;
-            } else {
-              width = Math.round(width * (max / height));
-              height = max;
-            }
+            if (width > height) { height = Math.round(height * (max / width)); width = max; }
+            else { width = Math.round(width * (max / height)); height = max; }
           }
           const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
+          canvas.width = width; canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
           const dataUrl = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
@@ -997,12 +1057,8 @@ function App() {
   }
 
   async function handleFile(file) {
-    if (!file || !file.type.startsWith('image/')) {
-      setError('Please upload an image file');
-      return;
-    }
-    setError('');
-    setSavedFavThisRound(false);
+    if (!file || !file.type.startsWith('image/')) { setError('Please upload an image file'); return; }
+    setError(''); setSavedFavThisRound(false);
     try {
       const { dataUrl, base64, mediaType } = await resizeImage(file);
       setImagePreview(dataUrl);
@@ -1014,34 +1070,25 @@ function App() {
   }
 
   async function analyzeImage(base64, mediaType) {
-    setAnalyzing(true);
-    setAnalysis(null);
-    setError('');
-
+    setAnalyzing(true); setAnalysis(null); setError('');
     try {
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image: base64, mediaType }),
       });
-
       const responseText = await response.text();
       let parsed;
       try { parsed = JSON.parse(responseText); }
       catch (e) { throw new Error(`Server returned non-JSON: ${responseText.slice(0, 100)}`); }
-
       if (!response.ok) {
         const detail = parsed.detail ? ` (${parsed.detail.slice(0, 100)})` : '';
         throw new Error((parsed.error || 'Analysis failed') + detail);
       }
-
       if (parsed.error) {
         setError(`Claude says: ${parsed.error}. You can still enter values manually.`);
-        setAnalysis(blankAnalysis());
-        setAnalyzing(false);
-        return;
+        setAnalysis(blankAnalysis()); setAnalyzing(false); return;
       }
-
       setAnalysis({
         name: parsed.name || 'Unknown food',
         serving_description: parsed.serving_description || '1 serving',
@@ -1049,6 +1096,7 @@ function App() {
         protein_g: Math.round((parsed.protein_g || 0) * 10) / 10,
         carbs_g: Math.round((parsed.carbs_g || 0) * 10) / 10,
         fat_g: Math.round((parsed.fat_g || 0) * 10) / 10,
+        saturated_fat_g: Math.round((parsed.saturated_fat_g || 0) * 10) / 10,
         confidence: parsed.confidence || 'medium',
         notes: parsed.notes || '',
         servings: 1,
@@ -1058,59 +1106,38 @@ function App() {
       console.error(e);
       setError(`Could not analyze: ${e.message}. Enter values manually below.`);
       setAnalysis(blankAnalysis());
-    } finally {
-      setAnalyzing(false);
-    }
+    } finally { setAnalyzing(false); }
   }
 
   function blankAnalysis() {
     return {
-      name: 'New entry',
-      serving_description: '1 serving',
-      calories: 0,
-      protein_g: 0,
-      carbs_g: 0,
-      fat_g: 0,
-      confidence: 'low',
-      notes: 'Manually entered',
-      servings: 1,
-      favoriteId: null,
+      name: 'New entry', serving_description: '1 serving',
+      calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0, saturated_fat_g: 0,
+      confidence: 'low', notes: 'Manually entered', servings: 1, favoriteId: null,
     };
   }
 
   function startManualEntry() {
-    setImagePreview(null);
-    setError('');
-    setSavedFavThisRound(false);
+    setImagePreview(null); setError(''); setSavedFavThisRound(false);
     setAnalysis(blankAnalysis());
   }
 
   function loadFromFavorite(fav) {
-    setImagePreview(null);
-    setError('');
-    setSavedFavThisRound(false);
+    setImagePreview(null); setError(''); setSavedFavThisRound(false);
     setAnalysis({
-      name: fav.name,
-      serving_description: fav.serving_description,
-      calories: fav.calories,
-      protein_g: fav.protein_g,
-      carbs_g: fav.carbs_g,
-      fat_g: fav.fat_g,
-      confidence: 'high',
-      notes: 'from favorites',
-      servings: fav.last_servings || 1,
-      favoriteId: fav.id,
+      name: fav.name, serving_description: fav.serving_description,
+      calories: fav.calories, protein_g: fav.protein_g, carbs_g: fav.carbs_g, fat_g: fav.fat_g,
+      saturated_fat_g: fav.saturated_fat_g || 0,
+      confidence: 'high', notes: 'from favorites',
+      servings: fav.last_servings || 1, favoriteId: fav.id,
     });
-    // Scroll to the entry area
     setTimeout(() => {
       const el = document.querySelector('.upload-section');
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 50);
   }
 
-  function updateAnalysisField(field, value) {
-    setAnalysis(a => ({ ...a, [field]: value }));
-  }
+  function updateAnalysisField(field, value) { setAnalysis(a => ({ ...a, [field]: value })); }
 
   function updateServings(delta) {
     setAnalysis(a => {
@@ -1128,72 +1155,53 @@ function App() {
   function logEntry() {
     if (!analysis) return;
     const entry = {
-      id: Date.now(),
-      time: new Date().toISOString(),
-      name: analysis.name,
-      serving_description: analysis.serving_description,
+      id: Date.now(), time: new Date().toISOString(),
+      name: analysis.name, serving_description: analysis.serving_description,
       servings: analysis.servings,
-      calories: analysis.calories,
-      protein_g: analysis.protein_g,
-      carbs_g: analysis.carbs_g,
-      fat_g: analysis.fat_g,
+      calories: analysis.calories, protein_g: analysis.protein_g,
+      carbs_g: analysis.carbs_g, fat_g: analysis.fat_g,
+      saturated_fat_g: analysis.saturated_fat_g || 0,
     };
     const next = { ...allEntries, [viewDate]: [...(allEntries[viewDate] || []), entry] };
-    setAllEntries(next);
-    persistEntries(next);
-
-    // If this came from a favorite, bump its use count and update last_servings
+    setAllEntries(next); persistEntries(next);
     if (analysis.favoriteId) {
       const updatedFavs = favorites.map(f =>
         f.id === analysis.favoriteId
           ? { ...f, use_count: (f.use_count || 0) + 1, last_servings: analysis.servings }
           : f
       );
-      setFavorites(updatedFavs);
-      persistFavorites(updatedFavs);
+      setFavorites(updatedFavs); persistFavorites(updatedFavs);
     }
-
     resetForm();
   }
 
   function saveAsFavorite() {
     if (!analysis) return;
-    // Avoid exact duplicates by name
     const dupe = favorites.find(f => f.name.trim().toLowerCase() === analysis.name.trim().toLowerCase());
     if (dupe) {
-      // Update the existing one rather than create a duplicate
       const updated = favorites.map(f =>
         f.id === dupe.id
           ? { ...f,
               serving_description: analysis.serving_description,
-              calories: analysis.calories,
-              protein_g: analysis.protein_g,
-              carbs_g: analysis.carbs_g,
-              fat_g: analysis.fat_g,
-              last_servings: analysis.servings,
-            }
+              calories: analysis.calories, protein_g: analysis.protein_g,
+              carbs_g: analysis.carbs_g, fat_g: analysis.fat_g,
+              saturated_fat_g: analysis.saturated_fat_g || 0,
+              last_servings: analysis.servings }
           : f
       );
-      setFavorites(updated);
-      persistFavorites(updated);
-      // Link current analysis to this favorite so logging bumps count
+      setFavorites(updated); persistFavorites(updated);
       setAnalysis(a => ({ ...a, favoriteId: dupe.id }));
     } else {
       const newFav = {
-        id: Date.now(),
-        name: analysis.name,
-        serving_description: analysis.serving_description,
-        calories: analysis.calories,
-        protein_g: analysis.protein_g,
-        carbs_g: analysis.carbs_g,
-        fat_g: analysis.fat_g,
-        last_servings: analysis.servings,
-        use_count: 0,
+        id: Date.now(), name: analysis.name, serving_description: analysis.serving_description,
+        calories: analysis.calories, protein_g: analysis.protein_g,
+        carbs_g: analysis.carbs_g, fat_g: analysis.fat_g,
+        saturated_fat_g: analysis.saturated_fat_g || 0,
+        last_servings: analysis.servings, use_count: 0,
         created_at: new Date().toISOString(),
       };
       const next = [...favorites, newFav];
-      setFavorites(next);
-      persistFavorites(next);
+      setFavorites(next); persistFavorites(next);
       setAnalysis(a => ({ ...a, favoriteId: newFav.id }));
     }
     setSavedFavThisRound(true);
@@ -1201,30 +1209,16 @@ function App() {
 
   function deleteFavorite(id) {
     const next = favorites.filter(f => f.id !== id);
-    setFavorites(next);
-    persistFavorites(next);
+    setFavorites(next); persistFavorites(next);
   }
 
-  function startEditFav(fav) {
-    setEditingFavId(fav.id);
-    setEditFavDraft({ ...fav });
-  }
-
-  function cancelEditFav() {
-    setEditingFavId(null);
-    setEditFavDraft(null);
-  }
-
+  function startEditFav(fav) { setEditingFavId(fav.id); setEditFavDraft({ ...fav }); }
+  function cancelEditFav() { setEditingFavId(null); setEditFavDraft(null); }
   function saveEditFav() {
     const next = favorites.map(f => f.id === editingFavId ? { ...editFavDraft } : f);
-    setFavorites(next);
-    persistFavorites(next);
-    cancelEditFav();
+    setFavorites(next); persistFavorites(next); cancelEditFav();
   }
-
-  function updateEditFavField(field, value) {
-    setEditFavDraft(d => ({ ...d, [field]: value }));
-  }
+  function updateEditFavField(field, value) { setEditFavDraft(d => ({ ...d, [field]: value })); }
 
   function deleteEntry(dateKey, id) {
     const next = {
@@ -1232,20 +1226,11 @@ function App() {
       [dateKey]: (allEntries[dateKey] || []).filter(e => e.id !== id),
     };
     if (next[dateKey].length === 0) delete next[dateKey];
-    setAllEntries(next);
-    persistEntries(next);
+    setAllEntries(next); persistEntries(next);
   }
 
-  function startEdit(entry) {
-    setEditingId(entry.id);
-    setEditDraft({ ...entry });
-  }
-
-  function cancelEdit() {
-    setEditingId(null);
-    setEditDraft(null);
-  }
-
+  function startEdit(entry) { setEditingId(entry.id); setEditDraft({ ...entry }); }
+  function cancelEdit() { setEditingId(null); setEditDraft(null); }
   function saveEdit(dateKey) {
     const next = {
       ...allEntries,
@@ -1253,20 +1238,12 @@ function App() {
         e.id === editingId ? { ...editDraft } : e
       ),
     };
-    setAllEntries(next);
-    persistEntries(next);
-    cancelEdit();
+    setAllEntries(next); persistEntries(next); cancelEdit();
   }
-
-  function updateEditField(field, value) {
-    setEditDraft(d => ({ ...d, [field]: value }));
-  }
+  function updateEditField(field, value) { setEditDraft(d => ({ ...d, [field]: value })); }
 
   function resetForm() {
-    setAnalysis(null);
-    setImagePreview(null);
-    setError('');
-    setSavedFavThisRound(false);
+    setAnalysis(null); setImagePreview(null); setError(''); setSavedFavThisRound(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
@@ -1276,16 +1253,11 @@ function App() {
       protein_g: Math.max(0, parseFloat(draftTargets.protein_g) || 0),
       carbs_g: Math.max(0, parseFloat(draftTargets.carbs_g) || 0),
       fat_g: Math.max(0, parseFloat(draftTargets.fat_g) || 0),
+      saturated_fat_g: Math.max(0, parseFloat(draftTargets.saturated_fat_g) || 0),
     };
-    setTargets(cleaned);
-    persistTargets(cleaned);
-    setEditingTargets(false);
+    setTargets(cleaned); persistTargets(cleaned); setEditingTargets(false);
   }
-
-  function cancelTargetsEdit() {
-    setDraftTargets(targets);
-    setEditingTargets(false);
-  }
+  function cancelTargetsEdit() { setDraftTargets(targets); setEditingTargets(false); }
 
   function totalsFor(dateKey) {
     const entries = allEntries[dateKey] || [];
@@ -1294,7 +1266,8 @@ function App() {
       protein_g: acc.protein_g + e.protein_g * e.servings,
       carbs_g: acc.carbs_g + e.carbs_g * e.servings,
       fat_g: acc.fat_g + e.fat_g * e.servings,
-    }), { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0 });
+      saturated_fat_g: acc.saturated_fat_g + (e.saturated_fat_g || 0) * e.servings,
+    }), { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0, saturated_fat_g: 0 });
   }
 
   function formatTime(iso) {
@@ -1316,7 +1289,6 @@ function App() {
   if (!sortedDates.includes(todayKey())) sortedDates.unshift(todayKey());
   const isPast = viewDate !== todayKey();
 
-  // Favorites sorted by use_count desc, then newest first
   const sortedFavorites = [...favorites].sort((a, b) => {
     const useDiff = (b.use_count || 0) - (a.use_count || 0);
     if (useDiff !== 0) return useDiff;
@@ -1327,11 +1299,14 @@ function App() {
   const proGap = gapInfo(totals.protein_g, targets.protein_g, 'g');
   const carGap = gapInfo(totals.carbs_g, targets.carbs_g, 'g');
   const fatGap = gapInfo(totals.fat_g, targets.fat_g, 'g');
+  const satPct = targets.saturated_fat_g > 0 ? (totals.saturated_fat_g / targets.saturated_fat_g) * 100 : 0;
+  const satOver = targets.saturated_fat_g > 0 && totals.saturated_fat_g > targets.saturated_fat_g;
 
   const cal = analysis ? Math.round(analysis.calories * analysis.servings) : 0;
   const pro = analysis ? Math.round(analysis.protein_g * analysis.servings * 10) / 10 : 0;
   const car = analysis ? Math.round(analysis.carbs_g * analysis.servings * 10) / 10 : 0;
   const fat = analysis ? Math.round(analysis.fat_g * analysis.servings * 10) / 10 : 0;
+  const sat = analysis ? Math.round((analysis.saturated_fat_g || 0) * analysis.servings * 10) / 10 : 0;
 
   return (
     <div className="container">
@@ -1381,6 +1356,17 @@ function App() {
           <div className="stat-value">{Math.round(totals.fat_g)}<span className="unit">g</span>{targets.fat_g > 0 && <span className="of">/ {targets.fat_g}g</span>}</div>
           <div className={`stat-gap ${fatGap.over ? 'over' : ''}`}><span className="gap-num">{fatGap.text}</span></div>
           {targets.fat_g > 0 && <div className="progress-bar"><div className={`progress-fill ${fatGap.over ? 'over' : ''}`} style={{ width: `${Math.min(100, fatGap.percent)}%` }}></div></div>}
+
+          <div className="sat-sub">
+            <span className="sat-label">of which sat</span>
+            <span>
+              <span className={`sat-value ${satOver ? 'over' : ''}`}>{Math.round(totals.saturated_fat_g * 10) / 10}g</span>
+              {targets.saturated_fat_g > 0 && <span className="sat-of"> / {targets.saturated_fat_g}g</span>}
+            </span>
+          </div>
+          {targets.saturated_fat_g > 0 && (
+            <div className="sat-progress"><div className={`fill ${satOver ? 'over' : ''}`} style={{ width: `${Math.min(100, satPct)}%` }}></div></div>
+          )}
         </div>
       </div>
 
@@ -1397,6 +1383,7 @@ function App() {
           <div className="target-field"><label>Protein (g)</label><input type="number" inputMode="numeric" value={draftTargets.protein_g} onChange={(e) => setDraftTargets(d => ({ ...d, protein_g: e.target.value }))} /></div>
           <div className="target-field"><label>Carbs (g)</label><input type="number" inputMode="numeric" value={draftTargets.carbs_g} onChange={(e) => setDraftTargets(d => ({ ...d, carbs_g: e.target.value }))} /></div>
           <div className="target-field"><label>Fat (g)</label><input type="number" inputMode="numeric" value={draftTargets.fat_g} onChange={(e) => setDraftTargets(d => ({ ...d, fat_g: e.target.value }))} /></div>
+          <div className="target-field"><label>Sat Fat (g)</label><input type="number" inputMode="numeric" value={draftTargets.saturated_fat_g} onChange={(e) => setDraftTargets(d => ({ ...d, saturated_fat_g: e.target.value }))} /></div>
           <div className="targets-save-row">
             <button className="btn btn-small btn-ghost" onClick={cancelTargetsEdit}>Cancel</button>
             <button className="btn btn-small btn-primary" onClick={saveTargets}>Save targets</button>
@@ -1404,16 +1391,10 @@ function App() {
         </div>
       )}
 
-      {/* Favorites */}
       <div className="section">
-        <div className="section-title">
-          Favorites
-          <span className="num">00 / regulars</span>
-        </div>
+        <div className="section-title">Favorites<span className="num">00 / regulars</span></div>
         {sortedFavorites.length === 0 ? (
-          <div className="favorites-empty">
-            — no favorites yet — save items you eat often using the ☆ button after analyzing —
-          </div>
+          <div className="favorites-empty">— no favorites yet — save items you eat often using the ☆ button after analyzing —</div>
         ) : (
           <div className="favorites-grid">
             {sortedFavorites.map(fav => editingFavId === fav.id ? (
@@ -1422,15 +1403,32 @@ function App() {
                   style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--paper)', padding: '6px 8px', fontFamily: 'Fraunces, serif', fontSize: '14px', fontWeight: 600, color: 'var(--ink)', outline: 'none' }} />
                 <input type="text" value={editFavDraft.serving_description} onChange={(e) => updateEditFavField('serving_description', e.target.value)}
                   style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--paper)', padding: '4px 8px', fontFamily: 'DM Mono, monospace', fontSize: '10px', color: 'var(--muted)', outline: 'none' }} />
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4 }}>
-                  <input type="number" inputMode="decimal" value={editFavDraft.calories} onChange={(e) => updateEditFavField('calories', parseFloat(e.target.value) || 0)} title="Cal"
-                    style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--paper)', padding: '4px 6px', fontFamily: 'Fraunces, serif', fontSize: '12px', fontWeight: 600, color: 'var(--ink)', outline: 'none' }} />
-                  <input type="number" inputMode="decimal" step="0.1" value={editFavDraft.protein_g} onChange={(e) => updateEditFavField('protein_g', parseFloat(e.target.value) || 0)} title="Pro"
-                    style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--paper)', padding: '4px 6px', fontFamily: 'Fraunces, serif', fontSize: '12px', fontWeight: 600, color: 'var(--ink)', outline: 'none' }} />
-                  <input type="number" inputMode="decimal" step="0.1" value={editFavDraft.carbs_g} onChange={(e) => updateEditFavField('carbs_g', parseFloat(e.target.value) || 0)} title="Carb"
-                    style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--paper)', padding: '4px 6px', fontFamily: 'Fraunces, serif', fontSize: '12px', fontWeight: 600, color: 'var(--ink)', outline: 'none' }} />
-                  <input type="number" inputMode="decimal" step="0.1" value={editFavDraft.fat_g} onChange={(e) => updateEditFavField('fat_g', parseFloat(e.target.value) || 0)} title="Fat"
-                    style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--paper)', padding: '4px 6px', fontFamily: 'Fraunces, serif', fontSize: '12px', fontWeight: 600, color: 'var(--ink)', outline: 'none' }} />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 4 }}>
+                  <div>
+                    <div style={{ fontSize: 8, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: 2 }}>Cal</div>
+                    <input type="number" inputMode="decimal" value={editFavDraft.calories} onChange={(e) => updateEditFavField('calories', parseFloat(e.target.value) || 0)}
+                      style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--paper)', padding: '4px 6px', fontFamily: 'Fraunces, serif', fontSize: '12px', fontWeight: 600, color: 'var(--ink)', outline: 'none' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 8, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: 2 }}>Pro</div>
+                    <input type="number" inputMode="decimal" step="0.1" value={editFavDraft.protein_g} onChange={(e) => updateEditFavField('protein_g', parseFloat(e.target.value) || 0)}
+                      style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--paper)', padding: '4px 6px', fontFamily: 'Fraunces, serif', fontSize: '12px', fontWeight: 600, color: 'var(--ink)', outline: 'none' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 8, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: 2 }}>Carb</div>
+                    <input type="number" inputMode="decimal" step="0.1" value={editFavDraft.carbs_g} onChange={(e) => updateEditFavField('carbs_g', parseFloat(e.target.value) || 0)}
+                      style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--paper)', padding: '4px 6px', fontFamily: 'Fraunces, serif', fontSize: '12px', fontWeight: 600, color: 'var(--ink)', outline: 'none' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 8, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: 2 }}>Fat</div>
+                    <input type="number" inputMode="decimal" step="0.1" value={editFavDraft.fat_g} onChange={(e) => updateEditFavField('fat_g', parseFloat(e.target.value) || 0)}
+                      style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--paper)', padding: '4px 6px', fontFamily: 'Fraunces, serif', fontSize: '12px', fontWeight: 600, color: 'var(--ink)', outline: 'none' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 8, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: 2 }}>Sat</div>
+                    <input type="number" inputMode="decimal" step="0.1" value={editFavDraft.saturated_fat_g || 0} onChange={(e) => updateEditFavField('saturated_fat_g', parseFloat(e.target.value) || 0)}
+                      style={{ width: '100%', border: '1px solid var(--line)', background: 'var(--paper)', padding: '4px 6px', fontFamily: 'Fraunces, serif', fontSize: '12px', fontWeight: 600, color: 'var(--ink)', outline: 'none' }} />
+                  </div>
                 </div>
                 <div style={{ display: 'flex', gap: 6, marginTop: 'auto' }}>
                   <button className="btn btn-small btn-primary" onClick={saveEditFav}>Save</button>
@@ -1449,6 +1447,7 @@ function App() {
                   <div>{Math.round(fav.protein_g)}<span>pro</span></div>
                   <div>{Math.round(fav.carbs_g)}<span>carb</span></div>
                   <div>{Math.round(fav.fat_g)}<span>fat</span></div>
+                  {fav.saturated_fat_g > 0 && <div>{Math.round(fav.saturated_fat_g * 10) / 10}<span>sat</span></div>}
                 </div>
                 <div className="favorite-actions" onClick={(e) => e.stopPropagation()}>
                   <button className="favorite-action-btn" onClick={(e) => { e.stopPropagation(); startEditFav(fav); }} title="Edit">✎</button>
@@ -1460,7 +1459,6 @@ function App() {
         )}
       </div>
 
-      {/* Upload / Entry */}
       <div className="section upload-section">
         <div className="section-title">
           {isPast ? `Add to ${formatDateLabel(viewDate)}` : 'Add an entry'}
@@ -1515,6 +1513,7 @@ function App() {
                       <div className="macro-input"><label>Pro (g)</label><input type="number" inputMode="decimal" step="0.1" value={analysis.protein_g} onChange={(e) => updateAnalysisField('protein_g', parseFloat(e.target.value) || 0)} /></div>
                       <div className="macro-input"><label>Carb (g)</label><input type="number" inputMode="decimal" step="0.1" value={analysis.carbs_g} onChange={(e) => updateAnalysisField('carbs_g', parseFloat(e.target.value) || 0)} /></div>
                       <div className="macro-input"><label>Fat (g)</label><input type="number" inputMode="decimal" step="0.1" value={analysis.fat_g} onChange={(e) => updateAnalysisField('fat_g', parseFloat(e.target.value) || 0)} /></div>
+                      <div className="macro-input"><label>Sat Fat (g)</label><input type="number" inputMode="decimal" step="0.1" value={analysis.saturated_fat_g || 0} onChange={(e) => updateAnalysisField('saturated_fat_g', parseFloat(e.target.value) || 0)} /></div>
                     </div>
 
                     <div className="servings-row">
@@ -1528,7 +1527,7 @@ function App() {
                         <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--muted)' }}>Will log</div>
                         <div style={{ fontFamily: 'Fraunces, serif', fontWeight: 600, fontSize: '20px' }}>
                           {cal} <span style={{ fontSize: '11px', color: 'var(--muted)', fontFamily: 'DM Mono, monospace', fontWeight: 400 }}>kcal</span>
-                          <span style={{ fontSize: '12px', color: 'var(--muted)', marginLeft: '10px', fontFamily: 'DM Mono, monospace', fontWeight: 400 }}>{pro}p · {car}c · {fat}f</span>
+                          <span style={{ fontSize: '12px', color: 'var(--muted)', marginLeft: '10px', fontFamily: 'DM Mono, monospace', fontWeight: 400 }}>{pro}p · {car}c · {fat}f{sat > 0 && ` (${sat} sat)`}</span>
                         </div>
                       </div>
                     </div>
@@ -1548,7 +1547,6 @@ function App() {
         )}
       </div>
 
-      {/* Ledger */}
       <div className="section">
         <div className="section-title">
           {viewDate === todayKey() ? "Today's ledger" : `Ledger · ${formatDateLabel(viewDate)}`}
@@ -1569,7 +1567,10 @@ function App() {
                       <label>Cal</label><input type="number" inputMode="decimal" value={editDraft.calories} onChange={(e) => updateEditField('calories', parseFloat(e.target.value) || 0)} />
                       <label>Pro</label><input type="number" inputMode="decimal" step="0.1" value={editDraft.protein_g} onChange={(e) => updateEditField('protein_g', parseFloat(e.target.value) || 0)} />
                       <label>Carb</label><input type="number" inputMode="decimal" step="0.1" value={editDraft.carbs_g} onChange={(e) => updateEditField('carbs_g', parseFloat(e.target.value) || 0)} />
+                    </div>
+                    <div className="editor-row">
                       <label>Fat</label><input type="number" inputMode="decimal" step="0.1" value={editDraft.fat_g} onChange={(e) => updateEditField('fat_g', parseFloat(e.target.value) || 0)} />
+                      <label>Sat</label><input type="number" inputMode="decimal" step="0.1" value={editDraft.saturated_fat_g || 0} onChange={(e) => updateEditField('saturated_fat_g', parseFloat(e.target.value) || 0)} />
                     </div>
                     <div className="editor-row">
                       <label>Servings</label>
@@ -1591,7 +1592,11 @@ function App() {
                       <div className="entry-macro">{Math.round(entry.calories * entry.servings)}<span>kcal</span></div>
                       <div className="entry-macro">{Math.round(entry.protein_g * entry.servings * 10) / 10}<span>protein</span></div>
                       <div className="entry-macro">{Math.round(entry.carbs_g * entry.servings * 10) / 10}<span>carbs</span></div>
-                      <div className="entry-macro">{Math.round(entry.fat_g * entry.servings * 10) / 10}<span>fat</span></div>
+                      <div className="entry-macro">
+                        {Math.round(entry.fat_g * entry.servings * 10) / 10}
+                        {entry.saturated_fat_g > 0 && <span style={{ color: 'var(--gold)' }}>{`(${Math.round(entry.saturated_fat_g * entry.servings * 10) / 10} sat)`}</span>}
+                        {!entry.saturated_fat_g > 0 && <span>fat</span>}
+                      </div>
                     </div>
                     <button className="icon-btn edit" onClick={() => startEdit(entry)} title="Edit">✎</button>
                     <button className="icon-btn" onClick={() => deleteEntry(viewDate, entry.id)} title="Remove">✕</button>
